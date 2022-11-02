@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+from subprocess import SubprocessError, run
+import update_checker_common as common
+import re
+
+fwupd_regex = re.compile('Device ID:\s+\w+')
+
+def fw_update():
+  try:
+    run(["fwupdmgr", "refresh", "--force"], capture_output=True, check=True)
+  except SubprocessError:
+    common.error_notification("Failed to retrieve list of firmware updates", SubprocessError)
+    raise
+
+def fw_upgradable():
+  '''
+  Print rather than error_notification, if there are no updates available, fwupdmgr returns exit code 2
+  '''
+  try:
+    upgradeable = len(fwupd_regex.findall(run(["fwupdmgr", "get-updates"], capture_output=True, check=True).decode('utf-8')))
+  except SubprocessError:
+    print("No firmware updates available or failed to determine the number of firmware updates")
+    upgradeable = 0
+  return upgradeable
+
+def main():
+  fw_update()
+  fw_upgrades = fw_upgradable()
+
+  firmware_str = "Firmware upgrade available" if int(fw_upgrades) == 1 else str(fw_upgrades) + " firmware upgrades available\nRun `fwupdmgr update` to install"
+
+  common.update_notifier("Firmware update checker", common.icon, "Firmware updates available!", firmware_str)
+
+
+if __name__ == "__main__":
+    main()
