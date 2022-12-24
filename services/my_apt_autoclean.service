@@ -1,0 +1,7 @@
+[Unit]
+Description=Package cache autocleaner
+
+[Service]
+Type=oneshot
+CPUQuota=50%
+ExecStart=apt-get -y autoclean

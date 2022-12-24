@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from subprocess import SubprocessError, check_output, run
-import update_checker_common as common
+import aptupdatechecker.lib.update_checker_common as common
 import re
 
 updated_regex = re.compile('(\d+)\s+to\supgrade,')

@@ -1,0 +1,11 @@
+[Unit]
+Description=Package cache autocleaner (timer)
+
+[Timer]
+OnCalendar=weekly
+OnStartupSec=180m
+RandomizedDelaySec=60m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

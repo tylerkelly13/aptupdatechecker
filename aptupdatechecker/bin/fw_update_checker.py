@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from subprocess import SubprocessError, run
-import update_checker_common as common
+import aptupdatechecker.lib.update_checker_common as common
 import re
 
 fwupd_regex = re.compile('Device ID:\s+\w+')

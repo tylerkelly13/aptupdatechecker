@@ -1,0 +1,10 @@
+[Unit]
+Description=Unnecessary package autoremover (timer)
+[Timer]
+OnCalendar=weekly
+OnStartupSec=180m
+RandomizedDelaySec=60m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

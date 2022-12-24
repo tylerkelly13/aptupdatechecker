@@ -1,0 +1,8 @@
+[Unit]
+Description=Checks for package updates
+After=network-online.target
+
+[Service]
+Type=oneshot
+CPUQuota=50%
+ExecStart=
