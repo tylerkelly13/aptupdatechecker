@@ -1,0 +1,3 @@
+aptupdatechecker usr/lib
+debian/*.service /lib/systemd/system/
+debian/*.timer /lib/systemd/system/

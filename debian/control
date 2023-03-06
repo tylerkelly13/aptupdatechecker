@@ -1,0 +1,20 @@
+Source: aptupdatechecker
+Section: admin
+Priority: optional
+Maintainer: Tyler Crawford Kelly <tyler.kelly@outlook.com>
+Rules-Requires-Root: no
+Standards-Version: 4.5.1
+Build-Depends: debhelper-compat (= 13)
+
+Package: aptupdatechecker
+Architecture: all
+Package-Type: deb
+Depends: apt (>= 2),
+  python3-regex (>= 0.1.2019),
+  libnotify-bin (>= 0.7),
+  fwupd (>= 1.5),
+  python3 (>= 3.9),
+  python3-plyer (>= 2.0.0)
+Description: Basic application that
+ - Checks for software and firmware updates in the background.
+ - Notifies the user when updates are available.

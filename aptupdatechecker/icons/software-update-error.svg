@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="128"
+   height="128"
+   version="1.1"
+   id="svg10"
+   sodipodi:docname="software-update-error.svg"
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15)">
+  <defs
+     id="defs14" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="380"
+     inkscape:window-height="1036"
+     id="namedview12"
+     showgrid="false"
+     inkscape:zoom="6.9453125"
+     inkscape:cx="64"
+     inkscape:cy="64"
+     inkscape:window-x="768"
+     inkscape:window-y="20"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg10" />
+  <title
+     id="title2">New Update Icon</title>
+  <desc
+     id="desc4">This is shape (source) for Clarity vector icon theme for gtk</desc>
+  <metadata
+     id="metadata6">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>New Update Icon</dc:title>
+        <dc:description>This is shape (source) for Clarity vector icon theme for gtk</dc:description>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Jakub Jankiewicz</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>Jakub Jankiewicz</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:date>2010</dc:date>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <path
+     d="M 63.950006,125.14062 50.152122,97.476558 20.756631,107.23242 30.555128,77.867183 2.8593765,63.999995 30.555128,50.132808 20.756631,20.767577 50.152122,30.523433 63.950006,2.8593769 77.847874,30.523433 107.24337,20.767577 97.444868,50.132808 125.14062,63.999995 97.444868,77.867183 107.24337,107.23242 77.847874,97.476558 Z M 64.749883,89.02148 75.548227,74.517573 86.646525,60.201167 75.448242,60.298827 V 38.306636 H 54.051524 v 21.992187 l -11.198282,-0.09766 11.198282,14.316406 z"
+     id="path8"
+     style="fill:#800000;stroke-width:0.999923" />
+</svg>

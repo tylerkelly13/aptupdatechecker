@@ -1,0 +1,28 @@
+The Debian Package aptupdatechecker
+===================================
+
+A basic application that:
+
+- Checks for software and firmware updates in the background.
+- Notifies the user when updates are available.
+
+Usage
+-----
+
+To start the service, run::
+
+  sudo systemctl start aptupdatechecker
+
+To stop the service, run::
+
+  sudo systemctl stop aptupdatechecker
+
+To start the service on system boot, run::
+
+  sudo systemctl enable aptupdatechecker
+
+To prevent the service from starting on system boot, run::
+
+  sudo systemctl disable aptupdatechecker
+
+ -- Tyler Crawford Kelly <tyler@debian>  Sat, 24 Dec 2022 13:37:21 +1000
