@@ -1,2 +1,9 @@
 __pycache__/
 *.deb
+*.log
+*.debhelper
+*.substvars
+debhelper-build-stamp
+files
+debian/.debhelper
+debian/aptupdatechecker/
