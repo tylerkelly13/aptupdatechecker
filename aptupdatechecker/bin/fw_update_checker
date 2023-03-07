@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from subprocess import SubprocessError, run
-from ..common import update_checker_common as common
+import update_checker_common as common
 import re
 
 fwupd_regex = re.compile('Device ID:\s+\w+')
@@ -28,10 +28,10 @@ def main():
   fw_update()
   fw_upgrades = fw_upgradable()
 
-  firmware_str = "Firmware upgrade available" if int(fw_upgrades) == 1 else str(fw_upgrades) + " firmware upgrades available\nRun `fwupdmgr update` to install"
+  if int(fw_upgrades) >= 1:
+    firmware_str = "Firmware upgrade available" if int(fw_upgrades) == 1 else str(fw_upgrades) + " firmware upgrades available\nRun `fwupdmgr update` to install"
 
-  common.update_notifier(app=appname, title="Firmware updates available!", msg=firmware_str)
-
+    common.update_notifier(app=appname, title="Firmware updates available!", msg=firmware_str)
 
 if __name__ == "__main__":
     main()
