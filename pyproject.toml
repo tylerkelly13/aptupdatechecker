@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "apt-update-checker"
-version = "0.1.0.5"
+version = "0.1.0.7"
 description = ""
 authors = ["Tyler Kelly <tyler.kelly@outlook.com>"]
 license = "Apache 2.0"
@@ -9,8 +9,6 @@ packages = [{include = "apt_update_checker"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-plyer = "^2.1.0"
-
 
 [build-system]
 requires = ["poetry-core"]

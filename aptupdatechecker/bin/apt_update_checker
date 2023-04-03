@@ -24,10 +24,10 @@ def apt_installable():
 def main():
   apt_update()
   sw_upgrades = apt_installable()
+  if int(sw_upgrades) >= 1:
+    software_str = "Software upgrade available" if int(sw_upgrades) == 1 else (sw_upgrades) + " software upgrades available\nRun `aptupdater` to install"
 
-  software_str = "Software upgrade available" if int(sw_upgrades) == 1 else (sw_upgrades) + " software upgrades available\nRun `aptupdater` to install"
-
-  common.update_notifier(app=appname, title="Software updates available!", msg=software_str)
+    common.update_notifier(app=appname, title="Software updates available!", msg=software_str)
 
 if __name__ == "__main__":
     main()

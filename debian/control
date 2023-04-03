@@ -14,7 +14,6 @@ Depends: apt (>= 2),
   libnotify-bin (>= 0.7),
   fwupd (>= 1.5),
   python3 (>= 3.9),
-  python3-plyer (>= 2.0.0)
 Description: Basic application that
  - Checks for software and firmware updates in the background.
  - Notifies the user when updates are available.

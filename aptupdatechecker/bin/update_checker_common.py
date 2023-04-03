@@ -1,11 +1,25 @@
-from os.path import dirname
-from plyer import notification
+from os.path import dirname, join, split
+from os import environ
+import subprocess
 
-icon_ok = dirname(__file__) + "/icons/software-update-available.svg"
-icon_error = dirname(__file__) + "/icons/software-update-error.svg"
+icon_ok = join(split(dirname(__file__))[0], "icons/software-update-available.svg")
+icon_error = join(split(dirname(__file__))[0], "icons/software-update-error.svg")
+
+def set_dbus_addr():
+  ### replace with https://askubuntu.com/questions/879066/what-is-the-function-of-sytemds-execstartpre-directive
+  # https://superuser.com/questions/1555754/why-isnt-systemd-running-my-execstartpre-script
+  environ['DBUS_SESSION_BUS_ADDRESS'] = "unix:path=/run/user/1000/bus"
 
 def error_notification (title, errorstr, app, icon=icon_error):
-  notification.notify(title=title, message=str(errorstr), timeout=30, app_name=app, app_icon=icon, hints={"bgcolor":"#f00000", "fgcolor":"fcfcae", "frcolor":"ff0000"})
+  set_dbus_addr()
+  try:
+    subprocess.check_call(" ".join(['notify-send', '-t', '30000', '--app-name', '"{0}"'.format(app), '--icon', '"{0}"'.format(icon), '-u', 'critical', '"{0}"'.format(title), '"{0}"'.format(str(errorstr))]), shell=True)
+  except subprocess.CalledProcessError as e:
+    print("Notification failed")
 
 def update_notifier(app, title, msg, icon=icon_ok):
-    notification.notify(title=title, message=msg, timeout=30, app_name=app, app_icon=icon)
+  set_dbus_addr()
+  try:
+    subprocess.check_call(" ".join(['notify-send', '-t', '30000', '--app-name', '"{0}"'.format(app), '--icon', '"{0}"'.format(icon), '-u', 'normal', '"{0}"'.format(title), '"{0}"'.format(msg)]), shell=True)
+  except subprocess.CalledProcessError as e:
+    print("Notification failed")
