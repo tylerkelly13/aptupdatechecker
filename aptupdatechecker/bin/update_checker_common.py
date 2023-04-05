@@ -1,25 +1,45 @@
 from os.path import dirname, join, split
-from os import environ
 import subprocess
 
 icon_ok = join(split(dirname(__file__))[0], "icons/software-update-available.svg")
 icon_error = join(split(dirname(__file__))[0], "icons/software-update-error.svg")
 
-def set_dbus_addr():
-  ### replace with https://askubuntu.com/questions/879066/what-is-the-function-of-sytemds-execstartpre-directive
-  # https://superuser.com/questions/1555754/why-isnt-systemd-running-my-execstartpre-script
-  environ['DBUS_SESSION_BUS_ADDRESS'] = "unix:path=/run/user/1000/bus"
+def get_user():
+  username = subprocess.check_output("who | grep -P '^\w+' | awk '{print $1}'", shell=True).decode('utf-8').split('\n')[0]
+  uid = subprocess.check_output(" ".join(["id", "-u", '"{0}"'.format(username)]), shell=True).decode('utf-8').split("\n")[0]
+  return [
+    uid,
+    username
+  ]
+
+def get_display():
+  return subprocess.check_output("who | grep -m1 -P '^\w+' | awk '{print $5}' | sed 's/[(|)]//g'", shell=True).decode('utf-8').split("\n")[0]
+
+
+def set_envs(user = get_user(), display = get_display()):
+  uid, username = user
+  return (
+    " ".join(
+    [
+      "sudo -u {0}".format(username),
+      "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{0}/bus".format(uid),
+      "XDG_RUNTIME_DIR=/run/user/{0}".format(uid),
+      "DISPLAY={0}".format(display),
+      "UID={0}".format(uid),
+    ]))
 
 def error_notification (title, errorstr, app, icon=icon_error):
-  set_dbus_addr()
   try:
-    subprocess.check_call(" ".join(['notify-send', '-t', '30000', '--app-name', '"{0}"'.format(app), '--icon', '"{0}"'.format(icon), '-u', 'critical', '"{0}"'.format(title), '"{0}"'.format(str(errorstr))]), shell=True)
+    env = set_envs()
+    command = " ".join([env, 'notify-send', '-t', '30000', '--app-name', '"{0}"'.format(app), '--icon', '"{0}"'.format(icon), '-u', 'critical', '"{0}"'.format(title), '"{0}"'.format(str(errorstr))])
+    subprocess.check_call(command, shell=True)
   except subprocess.CalledProcessError as e:
-    print("Notification failed")
+    print("Notification failed:", e.stderr)
 
 def update_notifier(app, title, msg, icon=icon_ok):
-  set_dbus_addr()
   try:
-    subprocess.check_call(" ".join(['notify-send', '-t', '30000', '--app-name', '"{0}"'.format(app), '--icon', '"{0}"'.format(icon), '-u', 'normal', '"{0}"'.format(title), '"{0}"'.format(msg)]), shell=True)
+    env = set_envs()
+    command = " ".join([env, 'notify-send', '-t', '30000', '--app-name', '"{0}"'.format(app), '--icon', '"{0}"'.format(icon), '-u', 'normal', '"{0}"'.format(title), '"{0}"'.format(msg)])
+    subprocess.check_call(command, shell=True)
   except subprocess.CalledProcessError as e:
-    print("Notification failed")
+    print("Notification failed:", e.stderr)

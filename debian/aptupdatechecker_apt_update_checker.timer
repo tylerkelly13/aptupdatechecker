@@ -10,3 +10,5 @@ Persistent=true
 [Install]
 WantedBy=timers.target
 WantedBy=aptupdatechecker.service
+WantedBy=graphical.target
+WantedBy=multi-user.target
