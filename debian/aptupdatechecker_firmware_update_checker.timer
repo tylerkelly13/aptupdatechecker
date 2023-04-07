@@ -1,14 +1,14 @@
 [Unit]
 Description=Checks for firmware updates (timer)
 
+Requires=graphical.target multi-user.target
+After=graphical.target multi-user.target
+
 [Timer]
 OnCalendar=6 hours
-OnStartupSec=60m
-RandomizedDelaySec=60m
+OnStartupSec=5min
+RandomizedDelaySec=5min
 Persistent=true
 
 [Install]
-WantedBy=timers.target
-WantedBy=aptupdatechecker.service
-WantedBy=graphical.target
-WantedBy=multi-user.target
+WantedBy=timers.target aptupdatechecker.service

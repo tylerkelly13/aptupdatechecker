@@ -1,6 +1,5 @@
 [Unit]
 Description=Checks for firmware updates
-After=network-online.target
 
 [Service]
 Type=oneshot
