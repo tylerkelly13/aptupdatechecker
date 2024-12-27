@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "apt-update-checker"
-version = "0.1.0.0"
+version = "0.1.1.0"
 description = ""
 authors = ["Tyler Kelly <tyler.kelly@outlook.com>"]
 license = "Apache 2.0"
