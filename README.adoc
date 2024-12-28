@@ -1,0 +1,7 @@
+= aptupdatechecker
+
+Update checker (daemon) that works with APT.
+
+Checks if there are package updates for the device's software and firmware.
+
+To build the package, run `./packup.sh`.
