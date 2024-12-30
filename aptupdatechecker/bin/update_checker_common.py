@@ -16,8 +16,10 @@ def get_users():
   return sudoers
 
 def get_display():
-  return subprocess.check_output("who | grep -m1 -P '^\w+' | awk '{print $5}' | sed 's/[(|)]//g'", shell=True).decode('utf-8').split("\n")[0]
-
+  try:
+    return subprocess.check_output("who | grep -m1 -P '^\w+' | awk '{print $5}' | sed 's/[(|)]//g'", shell=True).decode('utf-8').split("\n")[0]
+  except:
+    return ":0"
 
 def set_envs(users = get_users(), display = get_display()):
   sudo_user_set_envs = []

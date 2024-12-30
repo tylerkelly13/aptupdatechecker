@@ -6,6 +6,6 @@ aptupdatechecker (0.1.0) unstable; urgency=low
 
 aptupdatechecker (0.1.1) unstable; urgency=low
 
-  * Initial Release. Trying to get the package working with Wayland.
+  * Get the package working with Wayland.
 
  -- Tyler Crawford Kelly <tyler.kelly@outlook.com>  Sat, 06 Mar 2023 13:37:21 +1000
