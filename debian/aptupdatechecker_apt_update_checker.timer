@@ -5,7 +5,7 @@ Requires=graphical.target multi-user.target
 After=graphical.target multi-user.target
 
 [Timer]
-OnCalendar=6 hours
+OnCalendar=hourly
 OnStartupSec=5min
 RandomizedDelaySec=5min
 Persistent=true

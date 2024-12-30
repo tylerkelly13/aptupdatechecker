@@ -8,4 +8,10 @@ aptupdatechecker (0.1.1) unstable; urgency=low
 
   * Get the package working with Wayland.
 
- -- Tyler Crawford Kelly <tyler.kelly@outlook.com>  Sat, 06 Mar 2023 13:37:21 +1000
+ -- Tyler Crawford Kelly <tyler.kelly@outlook.com>  Mon, 30 Dec 2024 16:50:00 +1000
+
+aptupdatechecker (1.1.2) unstable; urgency=low
+
+  * Systemd timer fixes.
+
+ -- Tyler Crawford Kelly <tyler.kelly@outlook.com>  Mon, 30 Dec 2024 19:55:00 +1000

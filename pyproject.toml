@@ -1,6 +1,6 @@
 [project]
 name = "apt-update-checker"
-version = "0.1.1.1"
+version = "0.1.1.2"
 description = "Update checker (daemon) that works with APT."
 authors = ["Tyler Kelly <tyler.kelly@outlook.com>"]
 license = { file = "LICENSE-2.0.txt" } # "Apache 2.0"
