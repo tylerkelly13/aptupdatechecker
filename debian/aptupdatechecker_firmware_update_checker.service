@@ -1,7 +1,0 @@
-[Unit]
-Description=Checks for firmware updates
-
-[Service]
-Type=oneshot
-CPUQuota=50%
-ExecStart=python3 /usr/lib/aptupdatechecker/bin/fw_update_checker

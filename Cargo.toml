@@ -1,0 +1,17 @@
+[package]
+name = "aptupdatechecker"
+description = ""
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+
+[dependencies]
+notify-rust = "4.11.7"
+regex = "1.12.2"
+rust-apt = "0.8.0"
+
+[dev-dependencies]
+proptest = "1.6"
+
+[patch.crates-io]
+rust-apt = { path = "vendor/rust-apt" }

@@ -7,3 +7,8 @@ debhelper-build-stamp
 files
 debian/.debhelper
 debian/aptupdatechecker/
+
+# Added by cargo
+
+/target
+/vendor/
