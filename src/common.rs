@@ -1,7 +1,7 @@
 //! Common notification utilities
 //!
 //! Provides shared types and functions for sending desktop notifications
-//! using the freedesktop notification system (via notify-rust).
+//! using the freedesktop notification system through notify-rust.
 
 use notify_rust::{Hint, Notification, Urgency};
 
@@ -23,6 +23,66 @@ pub enum App {
     Apt,
     /// Firmware update checker (fwupd)
     Fwupd,
+}
+
+/// Returns the icon name for a notification type.
+///
+/// # Arguments
+///
+/// * `notification_type` - The type of notification
+///
+/// # Returns
+///
+/// * `"info"` for Info notifications
+/// * `"error"` for Error notifications
+pub fn get_icon(notification_type: &NotificationType) -> &'static str {
+    match notification_type {
+        NotificationType::Info => "info",
+        NotificationType::Error => "error",
+    }
+}
+
+/// Returns the urgency level for a notification type.
+///
+/// # Arguments
+///
+/// * `notification_type` - The type of notification
+///
+/// # Returns
+///
+/// * `Urgency::Normal` for Info notifications
+/// * `Urgency::Critical` for Error notifications
+pub fn get_urgency(notification_type: &NotificationType) -> Urgency {
+    match notification_type {
+        NotificationType::Info => Urgency::Normal,
+        NotificationType::Error => Urgency::Critical,
+    }
+}
+
+/// Returns the application name for a given app context.
+///
+/// # Arguments
+///
+/// * `app` - The application context
+///
+/// # Returns
+///
+/// * `"Apt Update Checker"` for Apt
+/// * `"Firmware Update Checker"` for Fwupd
+pub fn get_appname(app: &App) -> &'static str {
+    match app {
+        App::Apt => "Apt Update Checker",
+        App::Fwupd => "Firmware Update Checker",
+    }
+}
+
+/// Returns the notification timeout in milliseconds.
+///
+/// # Returns
+///
+/// 30000 milliseconds (30 seconds)
+pub const fn get_timeout() -> i32 {
+    30000
 }
 
 /// Sends a desktop notification with the specified parameters.
@@ -53,19 +113,10 @@ pub enum App {
 /// );
 /// ```
 pub fn notify(notification_type: NotificationType, app: App, title: &str, body: &str) {
-    let icon = match notification_type {
-        NotificationType::Info => "info",
-        NotificationType::Error => "error",
-    };
-    let urgency = match notification_type {
-        NotificationType::Info => Urgency::Normal,
-        NotificationType::Error => Urgency::Critical,
-    };
-    let appname = match app {
-        App::Apt => "Apt Update Checker",
-        App::Fwupd => "Firmware Update Checker",
-    };
-    let timeout = 30000; // 30 seconds in milliseconds
+    let icon = get_icon(&notification_type);
+    let urgency = get_urgency(&notification_type);
+    let appname = get_appname(&app);
+    let timeout = get_timeout();
 
     let _ = Notification::new()
         .summary(title)
@@ -80,7 +131,7 @@ pub fn notify(notification_type: NotificationType, app: App, title: &str, body: 
 
 /// Sends an error notification with critical urgency.
 ///
-/// This is a convenience wrapper around [`notify`] that always uses
+/// Convenience wrapper around [`notify`] that always uses
 /// [`NotificationType::Error`].
 ///
 /// # Arguments
@@ -101,4 +152,84 @@ pub fn notify(notification_type: NotificationType, app: App, title: &str, body: 
 /// ```
 pub fn notify_error(app: App, title: &str, message: &str) {
     notify(NotificationType::Error, app, title, message);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_icon_info() {
+        assert_eq!(get_icon(&NotificationType::Info), "info");
+    }
+
+    #[test]
+    fn test_get_icon_error() {
+        assert_eq!(get_icon(&NotificationType::Error), "error");
+    }
+
+    #[test]
+    fn test_get_urgency_info() {
+        assert_eq!(get_urgency(&NotificationType::Info), Urgency::Normal);
+    }
+
+    #[test]
+    fn test_get_urgency_error() {
+        assert_eq!(get_urgency(&NotificationType::Error), Urgency::Critical);
+    }
+
+    #[test]
+    fn test_get_appname_apt() {
+        assert_eq!(get_appname(&App::Apt), "Apt Update Checker");
+    }
+
+    #[test]
+    fn test_get_appname_fwupd() {
+        assert_eq!(get_appname(&App::Fwupd), "Firmware Update Checker");
+    }
+
+    #[test]
+    fn test_get_timeout() {
+        assert_eq!(get_timeout(), 30000);
+    }
+
+    #[test]
+    fn test_icon_and_urgency_consistency() {
+        // Info notifications should have normal urgency
+        let info_icon = get_icon(&NotificationType::Info);
+        let info_urgency = get_urgency(&NotificationType::Info);
+        assert_eq!(info_icon, "info");
+        assert_eq!(info_urgency, Urgency::Normal);
+
+        // Error notifications should have critical urgency
+        let error_icon = get_icon(&NotificationType::Error);
+        let error_urgency = get_urgency(&NotificationType::Error);
+        assert_eq!(error_icon, "error");
+        assert_eq!(error_urgency, Urgency::Critical);
+    }
+
+    #[test]
+    fn test_appname_uniqueness() {
+        // Each app should have a distinct name
+        let apt_name = get_appname(&App::Apt);
+        let fwupd_name = get_appname(&App::Fwupd);
+        assert_ne!(apt_name, fwupd_name);
+    }
+
+    #[test]
+    fn test_appname_non_empty() {
+        assert!(!get_appname(&App::Apt).is_empty());
+        assert!(!get_appname(&App::Fwupd).is_empty());
+    }
+
+    #[test]
+    fn test_icon_non_empty() {
+        assert!(!get_icon(&NotificationType::Info).is_empty());
+        assert!(!get_icon(&NotificationType::Error).is_empty());
+    }
+
+    #[test]
+    fn test_timeout_positive() {
+        assert!(get_timeout() > 0);
+    }
 }

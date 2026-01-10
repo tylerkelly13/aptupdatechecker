@@ -22,9 +22,9 @@ fn main() {
 
 /// Ensures the vendored rust-apt dependency has compatibility patches applied.
 ///
-/// This function automatically patches the vendored rust-apt crate to work with
-/// libapt-pkg 3.x (Debian testing/Trixie and later). The patches are idempotent
-/// and only apply if needed.
+/// Automatically patches the vendored rust-apt crate to work with
+/// libapt-pkg 3.x (Debian testing/Trixie and later). Patches are idempotent
+/// and only apply when needed.
 ///
 /// # Patches Applied
 ///
