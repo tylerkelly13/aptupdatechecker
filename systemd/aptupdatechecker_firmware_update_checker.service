@@ -1,0 +1,7 @@
+[Unit]
+Description=Checks for firmware updates
+
+[Service]
+Type=oneshot
+CPUQuota=50%
+ExecStart=/usr/bin/aptupdatechecker firmware

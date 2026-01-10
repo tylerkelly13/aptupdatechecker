@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+#DEBHELPER#
+
+if [ "$1" = "purge" ]; then
+    # Disable the timers on purge
+    deb-systemd-helper purge aptupdatechecker.service || true
+    deb-systemd-helper purge aptupdatechecker_apt_update_checker.timer || true
+    deb-systemd-helper purge aptupdatechecker_firmware_update_checker.timer || true
+    deb-systemd-helper purge aptupdatechecker_autoclean.timer || true
+    deb-systemd-helper purge aptupdatechecker_autoremove.timer || true
+
+    # Reload systemd daemon
+    deb-systemd-helper daemon-reload || true
+fi
+
+exit 0

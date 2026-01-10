@@ -1,0 +1,71 @@
+aptupdatechecker for Debian
+============================
+
+This package provides automated APT package and firmware update checking with
+desktop notifications.
+
+Systemd Units
+-------------
+
+The package installs the following systemd units:
+
+* aptupdatechecker.service - Meta service for grouping update checker services
+* aptupdatechecker_apt_update_checker.timer - Hourly APT update check timer
+* aptupdatechecker_firmware_update_checker.timer - Hourly firmware update check timer
+* aptupdatechecker_autoclean.timer - Weekly package cache cleanup timer
+* aptupdatechecker_autoremove.timer - Weekly unused package removal timer
+
+After installation, the timers are enabled and started automatically.
+
+Usage
+-----
+
+The binary supports the following subcommands:
+
+* aptupdatechecker apt - Check for APT package updates
+* aptupdatechecker firmware - Check for firmware updates
+
+The timers run these commands automatically on the configured schedule.
+
+Manual Execution
+----------------
+
+To manually trigger an update check:
+
+    aptupdatechecker apt
+    aptupdatechecker firmware
+
+To check the status of the timers:
+
+    systemctl status aptupdatechecker_apt_update_checker.timer
+    systemctl status aptupdatechecker_firmware_update_checker.timer
+
+To view logs:
+
+    journalctl -u aptupdatechecker_apt_update_checker.service
+    journalctl -u aptupdatechecker_firmware_update_checker.service
+
+Configuration
+-------------
+
+The timers run:
+* Update checks: Hourly, with a 5-minute startup delay and 5-minute random delay
+* Maintenance tasks: Weekly, with a 180-minute startup delay and 60-minute random delay
+
+To modify the schedule, edit the timer unit files in:
+    /lib/systemd/system/aptupdatechecker_*.timer
+
+After editing, reload the systemd configuration:
+
+    systemctl daemon-reload
+    systemctl restart aptupdatechecker_apt_update_checker.timer
+
+Dependencies
+------------
+
+Required packages:
+* apt - For package update checking
+* fwupd - For firmware update checking
+* libdbus-1-3 - For desktop notifications
+
+ -- Tyler <tyler@example.com>  Fri, 10 Jan 2026 00:00:00 +0000

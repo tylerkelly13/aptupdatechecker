@@ -1,0 +1,7 @@
+[Unit]
+Description=Unnecessary package autoremover
+
+[Service]
+Type=oneshot
+CPUQuota=50%
+ExecStart=apt-get -y autoremove

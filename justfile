@@ -45,3 +45,15 @@ install:
 clean:
     cargo clean
 
+# Vendor dependencies for Debian packaging
+vendor-deps:
+    cargo vendor --versioned-dirs
+
+# Build Debian package
+deb:
+    dpkg-buildpackage -us -uc -b
+
+# Clean Debian build artifacts
+deb-clean:
+    dh clean
+

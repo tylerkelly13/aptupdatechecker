@@ -1,0 +1,8 @@
+aptupdatechecker (0.1.0-1) unstable; urgency=medium
+
+  * Initial release.
+  * APT package update checking with desktop notifications.
+  * Firmware update checking through fwupdmgr.
+  * Automated maintenance tasks (autoclean, autoremove).
+
+ -- Tyler <tyler@example.com>  Fri, 10 Jan 2026 00:00:00 +0000

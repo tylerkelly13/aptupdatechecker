@@ -7,6 +7,10 @@ debhelper-build-stamp
 files
 debian/.debhelper
 debian/aptupdatechecker/
+debian/tmp/
+debian/*.debhelper.log
+debian/debhelper-build-stamp
+debian/files
 
 # Added by cargo
 
