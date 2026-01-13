@@ -1,7 +1,0 @@
-[Unit]
-Description=Checks for package updates
-
-[Service]
-Type=oneshot
-CPUQuota=50%
-ExecStart=/usr/bin/aptupdatechecker apt

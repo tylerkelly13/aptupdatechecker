@@ -118,7 +118,7 @@ pub fn notify(notification_type: NotificationType, app: App, title: &str, body: 
     let appname = get_appname(&app);
     let timeout = get_timeout();
 
-    let _ = Notification::new()
+    if let Err(e) = Notification::new()
         .summary(title)
         .appname(appname)
         .body(body)
@@ -126,7 +126,10 @@ pub fn notify(notification_type: NotificationType, app: App, title: &str, body: 
         .timeout(timeout)
         .urgency(urgency)
         .hint(Hint::Category("system".to_string()))
-        .show();
+        .show()
+    {
+        eprintln!("Failed to send notification: {}", e);
+    }
 }
 
 /// Sends an error notification with critical urgency.

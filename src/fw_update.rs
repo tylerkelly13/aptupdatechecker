@@ -150,7 +150,10 @@ fn check_for_fw_updates() {
         .output()
         .expect("Failed to execute fwupdmgr get-updates command");
 
-    if output.status.success() {
+    // fwupdmgr exits with code 0 when updates are available, code 2 when no updates available
+    let exit_code = output.status.code().unwrap_or(1);
+
+    if output.status.success() || exit_code == 2 {
         let stdout = String::from_utf8_lossy(&output.stdout);
         let match_count = count_firmware_updates(&stdout);
         if match_count > 0 {

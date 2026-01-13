@@ -1,0 +1,12 @@
+[Unit]
+Description=Check for package updates and notify (timer)
+Documentation=https://github.com/tyler/aptupdatechecker
+
+[Timer]
+OnCalendar=hourly
+OnStartupSec=10min
+RandomizedDelaySec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

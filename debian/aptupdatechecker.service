@@ -1,5 +1,0 @@
-systemd/aptupdatechecker.service
-systemd/aptupdatechecker_apt_update_checker.timer
-systemd/aptupdatechecker_firmware_update_checker.timer
-systemd/aptupdatechecker_autoclean.timer
-systemd/aptupdatechecker_autoremove.timer

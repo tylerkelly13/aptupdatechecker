@@ -1,0 +1,9 @@
+[Unit]
+Description=Check for package updates and notify user
+Documentation=https://github.com/tyler/aptupdatechecker
+After=aptupdatechecker_apt_cache_update.service
+
+[Service]
+Type=oneshot
+CPUQuota=50%
+ExecStart=/usr/bin/aptupdatechecker check

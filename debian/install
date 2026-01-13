@@ -1,2 +1,6 @@
 systemd/*.service lib/systemd/system/
 systemd/*.timer lib/systemd/system/
+systemd/system/*.service lib/systemd/system/
+systemd/system/*.timer lib/systemd/system/
+systemd/user/*.service usr/lib/systemd/user/
+systemd/user/*.timer usr/lib/systemd/user/

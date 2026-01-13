@@ -17,8 +17,7 @@ Depends: ${shlibs:Depends},
          ${misc:Depends},
          apt,
          fwupd,
-         libdbus-1-3,
-         libapt-pkg6.0
+         libdbus-1-3
 Description: System service for checking APT package and firmware updates
  A system service that checks for available APT package updates and firmware
  updates, then sends desktop notifications.

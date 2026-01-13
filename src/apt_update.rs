@@ -133,10 +133,56 @@ mod tests {
 /// notifications being sent. The function returns on errors.
 pub fn update_and_check() {
     // Update the APT cache
-    if !update_apt_cache() {
+    if !update_apt_cache(true) {
         return;
     }
 
+    // Check for updates and notify
+    check_for_updates();
+}
+
+/// Updates the APT cache only, without checking for updates or sending notifications.
+///
+/// This function is designed to run as root via a system service. It updates
+/// the package lists but does not send any notifications.
+///
+/// # Errors
+///
+/// Errors are printed to stderr. The function does not send notifications.
+pub fn update_cache_only() {
+    if !update_apt_cache(false) {
+        eprintln!("Failed to update APT cache");
+        std::process::exit(1);
+    } else {
+        println!("APT cache updated successfully");
+    }
+}
+
+/// Checks for available updates and sends notifications without updating the cache.
+///
+/// This function is designed to run as a regular user. It reads the existing
+/// APT cache (which should have been updated by a separate root process) and
+/// sends desktop notifications when updates are available.
+///
+/// # Notifications
+///
+/// - When updates are available, sends an informational notification with the count
+/// - When errors occur, sends error notifications with details
+/// - When no updates are available, prints to stdout (no notification)
+pub fn check_only() {
+    check_for_updates();
+}
+
+/// Checks for upgradable packages and sends notifications.
+///
+/// Reads the APT cache and counts upgradable packages. Does not update the cache.
+///
+/// # Notifications
+///
+/// - When updates are available, sends an informational notification
+/// - When errors occur, sends error notifications
+/// - When no updates are available, prints to stdout
+fn check_for_updates() {
     // Create a cache for checking upgrades
     let cache = match new_cache!() {
         Ok(cache) => cache,
@@ -170,36 +216,37 @@ pub fn update_and_check() {
     }
 }
 
-/// Updates the APT package cache (equivalent to `apt update`).
+/// Updates the APT package cache (runs `apt update`).
 ///
-/// Refreshes the package lists from all configured repositories,
-/// similar to running `apt update` on the command line.
+/// Refreshes the package lists from all configured repositories.
+///
+/// # Arguments
+///
+/// * `send_notifications` - Whether to send desktop notifications on errors
 ///
 /// # Returns
 ///
-/// * `true` - Cache update completed successfully
-/// * `false` - Cache update failed (error notification sent)
+/// * `true` - Cache update completed
+/// * `false` - Cache update failed
 ///
 /// # Behavior
 ///
-/// Uses the APT progress handler to track the update operation. Errors
-/// encountered during the update are filtered and presented through
-/// an error notification.
-///
-/// # Errors
-///
-/// Errors are handled internally by sending notifications. The function does
-/// not panic or propagate errors to the caller.
-fn update_apt_cache() -> bool {
+/// When `send_notifications` is true, errors trigger desktop notifications.
+/// When false, errors are printed to stderr.
+fn update_apt_cache(send_notifications: bool) -> bool {
     // Create a cache
     let cache = match new_cache!() {
         Ok(cache) => cache,
         Err(e) => {
-            notify_error(
-                App::Apt,
-                "APT Cache Initialization Failed",
-                &format!("Failed to initialize APT cache: {}", e),
-            );
+            if send_notifications {
+                notify_error(
+                    App::Apt,
+                    "APT Cache Initialization Failed",
+                    &format!("Failed to initialize APT cache: {}", e),
+                );
+            } else {
+                eprintln!("Failed to initialize APT cache: {}", e);
+            }
             return false;
         }
     };
@@ -215,11 +262,13 @@ fn update_apt_cache() -> bool {
             .map(|err| err.msg.clone())
             .collect();
 
-        notify_error(
-            App::Apt,
-            "APT Update Failed",
-            &format!("Failed to update package lists: {}", error_msgs.join(", ")),
-        );
+        let error_text = format!("Failed to update package lists: {}", error_msgs.join(", "));
+
+        if send_notifications {
+            notify_error(App::Apt, "APT Update Failed", &error_text);
+        } else {
+            eprintln!("{}", error_text);
+        }
         false
     } else {
         true
