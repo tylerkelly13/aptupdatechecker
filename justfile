@@ -51,9 +51,5 @@ vendor-deps:
 
 # Build Debian package
 deb:
-    dpkg-buildpackage -us -uc -b
-
-# Clean Debian build artifacts
-deb-clean:
-    dh clean
+    cargo deb
 

@@ -17,3 +17,17 @@ proptest = "1.6"
 
 [patch.crates-io]
 rust-apt = { path = "vendor/rust-apt" }
+
+[package.metadata.deb]
+maintainer = "Tyler Kelly <tyler.kelly@outlook.com>"
+section = "admin"
+priority = "optional"
+depends = "$auto, apt, fwupd"
+assets = [
+    ["target/release/aptupdatechecker", "usr/bin/", "755"],
+    ["systemd/system/*.service", "lib/systemd/system/", "644"],
+    ["systemd/system/*.timer", "lib/systemd/system/", "644"],
+    ["systemd/user/*.service", "usr/lib/systemd/user/", "644"],
+    ["systemd/user/*.timer", "usr/lib/systemd/user/", "644"],
+]
+maintainer-scripts = "debian/"

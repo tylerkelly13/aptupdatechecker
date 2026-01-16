@@ -28,14 +28,14 @@ Build the Debian package:
 
 [source,bash]
 ----
-dpkg-buildpackage -us -uc -b
+cargo deb
 ----
 
 Install the package:
 
 [source,bash]
 ----
-sudo apt install ../aptupdatechecker_0.1.0-1_amd64.deb
+sudo apt install ./target/debian/aptupdatechecker_0.1.0-1_amd64.deb
 ----
 
 Enable the user timers for notifications:
@@ -131,7 +131,7 @@ Checks for firmware updates hourly and sends desktop notifications.
 Requirements:
 
 * Rust toolchain (rustc >= 1.70)
-* Debian build tools (debhelper, dpkg-dev)
+* cargo-deb (`cargo install cargo-deb`)
 * Development libraries: libapt-pkg-dev, libdbus-1-dev, pkg-config
 
 Build the release binary:
@@ -152,7 +152,7 @@ Build the Debian package:
 
 [source,bash]
 ----
-dpkg-buildpackage -us -uc -b
+cargo deb
 ----
 
 === Testing Manually

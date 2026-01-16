@@ -1,25 +1,24 @@
 #!/bin/sh
 set -e
 
-#DEBHELPER#
-
 if [ "$1" = "configure" ]; then
     # Reload systemd daemon to pick up new unit files
-    deb-systemd-helper daemon-reload || true
+    systemctl daemon-reload || true
 
-    # Enable the timers
-    deb-systemd-helper enable aptupdatechecker.service || true
-    deb-systemd-helper enable aptupdatechecker_apt_update_checker.timer || true
-    deb-systemd-helper enable aptupdatechecker_firmware_update_checker.timer || true
-    deb-systemd-helper enable aptupdatechecker_autoclean.timer || true
-    deb-systemd-helper enable aptupdatechecker_autoremove.timer || true
+    # Enable and start system timers
+    systemctl enable aptupdatechecker.service || true
+    systemctl enable aptupdatechecker_apt_cache_update.timer || true
+    systemctl enable aptupdatechecker_autoclean.timer || true
+    systemctl enable aptupdatechecker_autoremove.timer || true
 
-    # Start the main service and timers
-    deb-systemd-invoke start aptupdatechecker.service || true
-    deb-systemd-invoke start aptupdatechecker_apt_update_checker.timer || true
-    deb-systemd-invoke start aptupdatechecker_firmware_update_checker.timer || true
-    deb-systemd-invoke start aptupdatechecker_autoclean.timer || true
-    deb-systemd-invoke start aptupdatechecker_autoremove.timer || true
+    systemctl start aptupdatechecker.service || true
+    systemctl start aptupdatechecker_apt_cache_update.timer || true
+    systemctl start aptupdatechecker_autoclean.timer || true
+    systemctl start aptupdatechecker_autoremove.timer || true
+
+    # Enable user timers globally (users can start them per-session)
+    systemctl --global enable aptupdatechecker_apt_update_checker.timer || true
+    systemctl --global enable aptupdatechecker_firmware_update_checker.timer || true
 fi
 
 exit 0

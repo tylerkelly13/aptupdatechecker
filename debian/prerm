@@ -1,15 +1,12 @@
 #!/bin/sh
 set -e
 
-#DEBHELPER#
-
 if [ "$1" = "remove" ]; then
-    # Stop the timers and service before removal
-    deb-systemd-invoke stop aptupdatechecker_apt_update_checker.timer || true
-    deb-systemd-invoke stop aptupdatechecker_firmware_update_checker.timer || true
-    deb-systemd-invoke stop aptupdatechecker_autoclean.timer || true
-    deb-systemd-invoke stop aptupdatechecker_autoremove.timer || true
-    deb-systemd-invoke stop aptupdatechecker.service || true
+    # Stop system timers and service
+    systemctl stop aptupdatechecker_apt_cache_update.timer || true
+    systemctl stop aptupdatechecker_autoclean.timer || true
+    systemctl stop aptupdatechecker_autoremove.timer || true
+    systemctl stop aptupdatechecker.service || true
 fi
 
 exit 0
