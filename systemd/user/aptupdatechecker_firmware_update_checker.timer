@@ -3,9 +3,9 @@ Description=Check for firmware updates and notify (timer)
 Documentation=https://github.com/tyler/aptupdatechecker
 
 [Timer]
-OnCalendar=hourly
-OnStartupSec=5min
-RandomizedDelaySec=5min
+OnStartupSec=10min
+OnUnitActiveSec=3h10min
+RandomizedDelaySec=2min
 Persistent=true
 
 [Install]

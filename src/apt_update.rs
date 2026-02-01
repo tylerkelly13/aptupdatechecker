@@ -9,6 +9,14 @@ use crate::common::{App, NotificationType, notify, notify_error};
 use rust_apt::cache::PackageSort;
 use rust_apt::new_cache;
 use rust_apt::progress::AcquireProgress;
+use std::fs;
+use std::time::{Duration, SystemTime};
+
+/// Maximum age (in hours) for the APT cache to be considered fresh.
+const APT_CACHE_MAX_AGE_HOURS: u64 = 8;
+
+/// Path to the APT package cache binary, regenerated on each `apt update`.
+const APT_PKGCACHE_PATH: &str = "/var/cache/apt/pkgcache.bin";
 
 /// Formats an update message based on the number of available updates.
 ///
@@ -170,7 +178,34 @@ pub fn update_cache_only() {
 /// - When errors occur, sends error notifications with details
 /// - When no updates are available, prints to stdout (no notification)
 pub fn check_only() {
+    if !is_apt_cache_fresh() {
+        println!("APT cache is stale, skipping update check.");
+        return;
+    }
     check_for_updates();
+}
+
+/// Checks whether the APT cache has been updated recently.
+///
+/// Returns `true` if the cache file at [`APT_PKGCACHE_PATH`] was modified
+/// within the last [`APT_CACHE_MAX_AGE_HOURS`] hours, `false` otherwise.
+fn is_apt_cache_fresh() -> bool {
+    let max_age = Duration::from_secs(APT_CACHE_MAX_AGE_HOURS * 3600);
+
+    let metadata = match fs::metadata(APT_PKGCACHE_PATH) {
+        Ok(m) => m,
+        Err(_) => return false,
+    };
+
+    let modified = match metadata.modified() {
+        Ok(t) => t,
+        Err(_) => return false,
+    };
+
+    match SystemTime::now().duration_since(modified) {
+        Ok(age) => age < max_age,
+        Err(_) => true, // Modified time is in the future; treat as fresh
+    }
 }
 
 /// Checks for upgradable packages and sends notifications.

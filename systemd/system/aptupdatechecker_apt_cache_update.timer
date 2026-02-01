@@ -3,8 +3,8 @@ Description=Update APT cache periodically
 Documentation=https://github.com/tyler/aptupdatechecker
 
 [Timer]
-OnBootSec=5min
-OnUnitActiveSec=6h
+OnBootSec=2min
+OnUnitActiveSec=3h
 Persistent=true
 
 [Install]
