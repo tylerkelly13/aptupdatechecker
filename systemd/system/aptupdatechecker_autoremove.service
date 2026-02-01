@@ -1,5 +1,6 @@
 [Unit]
 Description=Unnecessary package autoremover
+Documentation=https://github.com/tylerkelly13/aptupdatechecker
 
 [Service]
 Type=oneshot

@@ -1,5 +1,6 @@
 [Unit]
 Description=Unnecessary package autoremover (timer)
+Documentation=https://github.com/tylerkelly13/aptupdatechecker
 
 Requires=multi-user.target
 After=multi-user.target
