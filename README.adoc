@@ -100,7 +100,7 @@ Checks for firmware updates hourly and sends desktop notifications.
 
 | APT cache update
 | root
-| Every 6 hours
+| Every 3 hours
 | 5 minutes after boot
 
 | APT update check
