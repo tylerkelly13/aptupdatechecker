@@ -45,11 +45,33 @@ install:
 clean:
     cargo clean
 
+# Set up vendored rust-apt from cargo registry cache or crates.io
+setup-rust-apt:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ -f vendor/rust-apt/Cargo.toml ]; then
+        exit 0
+    fi
+    echo "Setting up vendor/rust-apt..."
+    mkdir -p vendor/rust-apt
+    RUST_APT_DIR=$(ls -d ~/.cargo/registry/src/index.crates.io-*/rust-apt-0.8.0/ 2>/dev/null | head -1 || true)
+    if [ -n "${RUST_APT_DIR}" ]; then
+        cp -r "${RUST_APT_DIR}"/* vendor/rust-apt/
+    else
+        echo "Downloading rust-apt 0.8.0 from crates.io..."
+        TMPTAR=$(mktemp /tmp/rust-apt-XXXXX.tar.gz)
+        curl -fsSL "https://crates.io/api/v1/crates/rust-apt/0.8.0/download" -o "$TMPTAR"
+        tar -xz -f "$TMPTAR" -C /tmp
+        cp -r /tmp/rust-apt-0.8.0/* vendor/rust-apt/
+        rm -rf "$TMPTAR" /tmp/rust-apt-0.8.0
+    fi
+    echo "vendor/rust-apt set up successfully"
+
 # Vendor dependencies for Debian packaging
-vendor-deps:
+vendor-deps: setup-rust-apt
     cargo vendor --versioned-dirs
 
 # Build Debian package
-deb:
+deb: setup-rust-apt
     cargo deb
 
