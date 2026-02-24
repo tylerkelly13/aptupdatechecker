@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "remove" ]; then
+    # Stop system timers and service
+    systemctl stop aptupdatechecker_apt_cache_update.timer || true
+    systemctl stop aptupdatechecker_autoclean.timer || true
+    systemctl stop aptupdatechecker_autoremove.timer || true
+    systemctl stop aptupdatechecker.service || true
+fi
+
+#DEBHELPER#
+
+exit 0

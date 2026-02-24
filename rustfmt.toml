@@ -1,0 +1,24 @@
+# Rustfmt configuration
+# See https://rust-lang.github.io/rustfmt/ for all options
+
+# Edition (should match Cargo.toml)
+edition = "2024"
+
+# Maximum line width
+max_width = 100
+
+# Indentation
+hard_tabs = false
+tab_spaces = 4
+
+# Use small heuristics for better formatting
+use_small_heuristics = "Default"
+
+# Match block trailing comma
+match_block_trailing_comma = false
+
+# Use field init shorthand when possible
+use_field_init_shorthand = true
+
+# Try to make code fit on one line when possible
+use_try_shorthand = true

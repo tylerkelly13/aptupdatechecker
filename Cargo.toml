@@ -1,0 +1,33 @@
+[package]
+name = "aptupdatechecker"
+description = "System service for checking APT package and firmware updates"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+authors = ["Tyler <tyler@example.com>"]
+repository = "https://github.com/tyler/aptupdatechecker"
+
+[dependencies]
+notify-rust = "4.11.7"
+regex = "1.12.2"
+rust-apt = "0.8.0"
+
+[dev-dependencies]
+proptest = "1.6"
+
+[patch.crates-io]
+rust-apt = { path = "vendor/rust-apt" }
+
+[package.metadata.deb]
+maintainer = "Tyler Kelly <tyler.kelly@outlook.com>"
+section = "admin"
+priority = "optional"
+depends = "$auto, apt, fwupd"
+assets = [
+    ["target/release/aptupdatechecker", "usr/bin/", "755"],
+    ["systemd/system/*.service", "lib/systemd/system/", "644"],
+    ["systemd/system/*.timer", "lib/systemd/system/", "644"],
+    ["systemd/user/*.service", "usr/lib/systemd/user/", "644"],
+    ["systemd/user/*.timer", "usr/lib/systemd/user/", "644"],
+]
+maintainer-scripts = "debian/"

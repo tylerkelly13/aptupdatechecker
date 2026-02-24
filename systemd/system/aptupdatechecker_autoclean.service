@@ -1,8 +1,9 @@
 [Unit]
 Description=Package cache autocleaner
+Documentation=https://github.com/tylerkelly13/aptupdatechecker
 
 [Service]
 Type=oneshot
-CPUQuota=50%
+CPUQuota=25%
 ExecStart=apt-get -y autoclean
 

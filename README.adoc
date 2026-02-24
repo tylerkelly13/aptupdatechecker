@@ -1,7 +1,183 @@
 = aptupdatechecker
 
-Update checker (daemon) that works with APT.
+A system service for checking APT package and firmware updates, with desktop notifications.
 
-Checks if there are package updates for the device's software and firmware.
+== Overview
 
-To build the package, run `./packup.sh`.
+`aptupdatechecker` monitors the system for available updates and sends desktop notifications to alert users. It uses a privilege-separated architecture to ensure security and proper notification delivery.
+
+The application checks for:
+
+* APT package updates through apt update and cache inspection
+* Firmware updates through fwupdmgr
+
+The application sends notifications using the freedesktop notification system.
+
+== Architecture
+
+The service uses separate processes for different privilege levels:
+
+* **System services** (run as root): Update the APT package cache
+* **User services** (run as user): Check for updates and send desktop notifications
+
+This separation ensures that notification code runs in the user session (with D-Bus access) while system operations run with appropriate privileges.
+
+== Installation
+
+Build the Debian package:
+
+[source,bash]
+----
+cargo deb
+----
+
+Install the package:
+
+[source,bash]
+----
+sudo apt install ./target/debian/aptupdatechecker_0.1.0-1_amd64.deb
+----
+
+Enable the user timers for notifications:
+
+[source,bash]
+----
+systemctl --user enable --now aptupdatechecker_apt_update_checker.timer
+systemctl --user enable --now aptupdatechecker_firmware_update_checker.timer
+----
+
+The system timer for APT cache updates enables automatically.
+
+== Commands
+
+The `aptupdatechecker` binary supports several operation modes:
+
+`aptupdatechecker update`::
+Updates the APT cache (requires root, no notifications). Used by the system service.
+
+`aptupdatechecker check`::
+Checks for APT updates and sends notifications (user mode). Does not update the cache.
+
+`aptupdatechecker fwupd`::
+Checks for firmware updates and sends notifications (user mode).
+
+`aptupdatechecker apt`::
+Legacy mode: updates cache and checks for APT updates (requires root and D-Bus access).
+
+`aptupdatechecker`::
+Legacy mode: runs both APT and firmware checks.
+
+== Systemd Services
+
+=== System Services
+
+Located in `/lib/systemd/system/`:
+
+`aptupdatechecker_apt_cache_update.service` / `.timer`::
+Updates the APT package cache every 6 hours as root.
+
+`aptupdatechecker_autoclean.service` / `.timer`::
+Runs `apt autoclean` weekly to remove obsolete package files.
+
+`aptupdatechecker_autoremove.service` / `.timer`::
+Runs `apt autoremove` weekly to remove unnecessary packages.
+
+=== User Services
+
+Located in `/usr/lib/systemd/user/`:
+
+`aptupdatechecker_apt_update_checker.service` / `.timer`::
+Checks for APT package updates hourly and sends desktop notifications.
+
+`aptupdatechecker_firmware_update_checker.service` / `.timer`::
+Checks for firmware updates hourly and sends desktop notifications.
+
+== Schedule
+
+[cols="2,1,1,1",options="header"]
+|===
+| Service | Runs As | Schedule | First Run
+
+| APT cache update
+| root
+| Every 3 hours
+| 5 minutes after boot
+
+| APT update check
+| user
+| Hourly
+| 10 minutes after boot
+
+| Firmware update check
+| user
+| Hourly
+| 5 minutes after boot
+
+| APT autoclean
+| root
+| Weekly
+| 3 hours after boot
+
+| APT autoremove
+| root
+| Weekly
+| 3 hours after boot
+|===
+
+== Development
+
+=== Building
+
+Requirements:
+
+* Rust toolchain (rustc >= 1.70)
+* cargo-deb (`cargo install cargo-deb`)
+* Development libraries: libapt-pkg-dev, libdbus-1-dev, pkg-config
+
+Build the release binary:
+
+[source,bash]
+----
+cargo build --release
+----
+
+Run tests:
+
+[source,bash]
+----
+cargo test
+----
+
+Build the Debian package:
+
+[source,bash]
+----
+cargo deb
+----
+
+=== Testing Manually
+
+Test the APT cache update (requires root):
+
+[source,bash]
+----
+sudo ./target/release/aptupdatechecker update
+----
+
+Test the APT update check (runs as user):
+
+[source,bash]
+----
+./target/release/aptupdatechecker check
+----
+
+Test the firmware check (runs as user):
+
+[source,bash]
+----
+./target/release/aptupdatechecker fwupd
+----
+
+== License
+
+See LICENSE file for details.

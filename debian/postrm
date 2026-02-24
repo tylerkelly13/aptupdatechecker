@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "purge" ]; then
+    # Disable system services and timers
+    systemctl disable aptupdatechecker.service || true
+    systemctl disable aptupdatechecker_apt_cache_update.timer || true
+    systemctl disable aptupdatechecker_autoclean.timer || true
+    systemctl disable aptupdatechecker_autoremove.timer || true
+
+    # Disable user timers globally
+    systemctl --global disable aptupdatechecker_apt_update_checker.timer || true
+    systemctl --global disable aptupdatechecker_firmware_update_checker.timer || true
+
+    # Reload systemd daemon
+    systemctl daemon-reload || true
+fi
+
+#DEBHELPER#
+
+exit 0

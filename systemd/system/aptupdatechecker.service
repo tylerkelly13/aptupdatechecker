@@ -1,5 +1,6 @@
 [Unit]
 Description=Aptupdatechecker meta service
+Documentation=https://github.com/tylerkelly13/aptupdatechecker
 
 [Service]
 Type=oneshot

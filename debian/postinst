@@ -1,0 +1,26 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "configure" ]; then
+    # Reload systemd daemon to pick up new unit files
+    systemctl daemon-reload || true
+
+    # Enable and start system timers
+    systemctl enable aptupdatechecker.service || true
+    systemctl enable aptupdatechecker_apt_cache_update.timer || true
+    systemctl enable aptupdatechecker_autoclean.timer || true
+    systemctl enable aptupdatechecker_autoremove.timer || true
+
+    systemctl start aptupdatechecker.service || true
+    systemctl start aptupdatechecker_apt_cache_update.timer || true
+    systemctl start aptupdatechecker_autoclean.timer || true
+    systemctl start aptupdatechecker_autoremove.timer || true
+
+    # Enable user timers globally (users can start them per-session)
+    systemctl --global enable aptupdatechecker_apt_update_checker.timer || true
+    systemctl --global enable aptupdatechecker_firmware_update_checker.timer || true
+fi
+
+#DEBHELPER#
+
+exit 0
