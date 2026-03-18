@@ -16,8 +16,12 @@ if [ "$1" = "configure" ]; then
     systemctl start aptupdatechecker_autoclean.timer || true
     systemctl start aptupdatechecker_autoremove.timer || true
 
-    # Enable user timers globally (users can start them per-session)
-    systemctl --global enable aptupdatechecker_apt_update_checker.timer || true
+    # Migrate from timer to path unit (clean up old timer if upgrading)
+    systemctl --global disable aptupdatechecker_apt_update_checker.timer 2>/dev/null || true
+    rm -f /usr/lib/systemd/user/aptupdatechecker_apt_update_checker.timer
+
+    # Enable user units globally (users can start them per-session)
+    systemctl --global enable aptupdatechecker_apt_update_checker.path || true
     systemctl --global enable aptupdatechecker_firmware_update_checker.timer || true
 fi
 

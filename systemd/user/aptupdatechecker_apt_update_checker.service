@@ -6,3 +6,4 @@ Documentation=https://github.com/tyler/aptupdatechecker
 Type=oneshot
 CPUQuota=25%
 ExecStart=/usr/bin/aptupdatechecker check
+ExecStartPost=-/bin/rm %t/apt-updates-available

@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch for APT cache update completion
+Documentation=https://github.com/tyler/aptupdatechecker
+
+[Path]
+PathExists=%t/apt-updates-available
+
+[Install]
+WantedBy=default.target
