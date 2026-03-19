@@ -53,76 +53,6 @@ pub fn format_update_message(count: usize) -> String {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_format_update_message_singular() {
-        let msg = format_update_message(1);
-        assert_eq!(
-            msg,
-            "1 software upgrade available\nRun `apt upgrade` to install"
-        );
-        assert!(msg.contains("upgrade")); // singular form
-        assert!(!msg.contains("upgrades")); // not plural
-    }
-
-    #[test]
-    fn test_format_update_message_plural() {
-        let msg = format_update_message(2);
-        assert_eq!(
-            msg,
-            "2 software upgrades available\nRun `apt upgrade` to install"
-        );
-        assert!(msg.contains("upgrades")); // plural form
-    }
-
-    #[test]
-    fn test_format_update_message_zero() {
-        let msg = format_update_message(0);
-        assert_eq!(
-            msg,
-            "0 software upgrades available\nRun `apt upgrade` to install"
-        );
-    }
-
-    #[test]
-    fn test_format_update_message_large_count() {
-        let msg = format_update_message(9999);
-        assert!(msg.contains("9999"));
-        assert!(msg.contains("upgrades"));
-        assert!(msg.contains("Run `apt upgrade` to install"));
-    }
-
-    #[test]
-    fn test_format_update_message_contains_instruction() {
-        // All messages should contain installation instructions
-        for count in [0, 1, 5, 100] {
-            let msg = format_update_message(count);
-            assert!(msg.contains("Run `apt upgrade` to install"));
-        }
-    }
-
-    #[test]
-    fn test_format_update_message_multiline() {
-        // Messages should be multiline with newline separator
-        let msg = format_update_message(5);
-        assert!(msg.contains('\n'));
-        let lines: Vec<&str> = msg.lines().collect();
-        assert_eq!(lines.len(), 2);
-    }
-
-    #[test]
-    fn test_format_update_message_count_in_message() {
-        // The count should appear in the message
-        for count in [1, 2, 10, 50, 100] {
-            let msg = format_update_message(count);
-            assert!(msg.contains(&count.to_string()));
-        }
-    }
-}
-
 /// Checks for available APT package updates and sends notifications.
 ///
 /// Performs a two-step process:
@@ -329,5 +259,75 @@ fn update_apt_cache(send_notifications: bool) -> bool {
         false
     } else {
         true
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format_update_message_singular() {
+        let msg = format_update_message(1);
+        assert_eq!(
+            msg,
+            "1 software upgrade available\nRun `apt upgrade` to install"
+        );
+        assert!(msg.contains("upgrade")); // singular form
+        assert!(!msg.contains("upgrades")); // not plural
+    }
+
+    #[test]
+    fn test_format_update_message_plural() {
+        let msg = format_update_message(2);
+        assert_eq!(
+            msg,
+            "2 software upgrades available\nRun `apt upgrade` to install"
+        );
+        assert!(msg.contains("upgrades")); // plural form
+    }
+
+    #[test]
+    fn test_format_update_message_zero() {
+        let msg = format_update_message(0);
+        assert_eq!(
+            msg,
+            "0 software upgrades available\nRun `apt upgrade` to install"
+        );
+    }
+
+    #[test]
+    fn test_format_update_message_large_count() {
+        let msg = format_update_message(9999);
+        assert!(msg.contains("9999"));
+        assert!(msg.contains("upgrades"));
+        assert!(msg.contains("Run `apt upgrade` to install"));
+    }
+
+    #[test]
+    fn test_format_update_message_contains_instruction() {
+        // All messages should contain installation instructions
+        for count in [0, 1, 5, 100] {
+            let msg = format_update_message(count);
+            assert!(msg.contains("Run `apt upgrade` to install"));
+        }
+    }
+
+    #[test]
+    fn test_format_update_message_multiline() {
+        // Messages should be multiline with newline separator
+        let msg = format_update_message(5);
+        assert!(msg.contains('\n'));
+        let lines: Vec<&str> = msg.lines().collect();
+        assert_eq!(lines.len(), 2);
+    }
+
+    #[test]
+    fn test_format_update_message_count_in_message() {
+        // The count should appear in the message
+        for count in [1, 2, 10, 50, 100] {
+            let msg = format_update_message(count);
+            assert!(msg.contains(&count.to_string()));
+        }
     }
 }
