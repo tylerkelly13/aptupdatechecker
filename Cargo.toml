@@ -1,7 +1,7 @@
 [package]
 name = "aptupdatechecker"
 description = "System service for checking APT package and firmware updates"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 license = "Apache-2.0"
 authors = ["Tyler <tyler@example.com>"]
@@ -29,5 +29,6 @@ assets = [
     ["systemd/system/*.timer", "lib/systemd/system/", "644"],
     ["systemd/user/*.service", "usr/lib/systemd/user/", "644"],
     ["systemd/user/*.timer", "usr/lib/systemd/user/", "644"],
+    ["systemd/user/*.path", "usr/lib/systemd/user/", "644"],
 ]
 maintainer-scripts = "debian/"

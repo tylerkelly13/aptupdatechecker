@@ -163,6 +163,28 @@ pub fn update_cache_only() {
         std::process::exit(1);
     } else {
         println!("APT cache updated successfully");
+        signal_user_sessions();
+    }
+}
+
+/// Signals all active user sessions that the APT cache update completed.
+///
+/// Touches `/run/user/<uid>/apt-updates-available` for each session directory
+/// found under `/run/user/`. Individual session failures do not abort the rest.
+fn signal_user_sessions() {
+    let run_user = std::path::Path::new("/run/user");
+    let entries = match std::fs::read_dir(run_user) {
+        Ok(e) => e,
+        Err(e) => {
+            eprintln!("Failed to read /run/user: {}", e);
+            return;
+        }
+    };
+    for entry in entries.flatten() {
+        let signal_file = entry.path().join("apt-updates-available");
+        if let Err(e) = std::fs::File::create(&signal_file) {
+            eprintln!("Failed to touch {}: {}", signal_file.display(), e);
+        }
     }
 }
 

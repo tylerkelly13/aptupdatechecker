@@ -8,8 +8,8 @@ if [ "$1" = "purge" ]; then
     systemctl disable aptupdatechecker_autoclean.timer || true
     systemctl disable aptupdatechecker_autoremove.timer || true
 
-    # Disable user timers globally
-    systemctl --global disable aptupdatechecker_apt_update_checker.timer || true
+    # Disable user units globally
+    systemctl --global disable aptupdatechecker_apt_update_checker.path || true
     systemctl --global disable aptupdatechecker_firmware_update_checker.timer || true
 
     # Reload systemd daemon

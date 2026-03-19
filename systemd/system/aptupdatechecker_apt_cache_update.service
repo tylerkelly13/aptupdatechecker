@@ -5,5 +5,4 @@ Documentation=https://github.com/tyler/aptupdatechecker
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/aptupdatechecker update
-ExecStartPost=/bin/sh -c 'for d in /run/user/*/; do touch "${d}apt-updates-available" 2>/dev/null || true; done'
 CPUQuota=25%

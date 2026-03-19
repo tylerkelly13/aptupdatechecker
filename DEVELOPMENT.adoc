@@ -1,0 +1,124 @@
+= Development
+
+== Architecture
+
+The service uses a privilege-separated architecture to ensure security and correct notification delivery.
+
+=== System Services (root)
+
+* `aptupdatechecker_apt_cache_update` — refreshes the APT package cache via `aptupdatechecker update`, then signals each active user session by touching `/run/user/<uid>/apt-updates-available`.
+* `aptupdatechecker_autoclean` — runs `apt autoclean` weekly.
+* `aptupdatechecker_autoremove` — runs `apt autoremove` weekly.
+
+=== User Services (per-user session)
+
+* `aptupdatechecker_apt_update_checker.path` — watches for `/run/user/<uid>/apt-updates-available`. When the system service creates this file, the path unit activates the corresponding service, which runs `aptupdatechecker check`, sends a desktop notification if updates are available, then removes the file.
+* `aptupdatechecker_firmware_update_checker` — runs `aptupdatechecker fwupd` on a timer to check for firmware updates.
+
+Notification code runs inside the user session so it has D-Bus access for desktop notifications.
+
+=== Systemd Unit Locations
+
+[cols="1,2",options="header"]
+|===
+| Path | Contents
+
+| `/lib/systemd/system/`
+| System timers and services (root-level)
+
+| `/usr/lib/systemd/user/`
+| User path unit, timers, and services
+|===
+
+== Project Structure
+
+----
+src/                    Application source
+systemd/system/         System-level unit files (source)
+systemd/user/           User-level unit files (source)
+debian/                 Maintainer scripts for dpkg
+vendor/rust-apt/        Vendored rust-apt crate (see below)
+----
+
+== Vendored Dependency
+
+The project vendors `rust-apt` 0.8.0 under `vendor/rust-apt/` with a local patch (`rust-apt-libapt3.patch`) applied. The patch replaces `APT::StringView` with `std::string_view` in `apt-pkg-c/cache.h` to support `libapt-pkg7.0` (libapt-pkg 3.x) shipped by Debian testing. The upstream `rust-apt` crate targets the older version.
+
+The `setup-rust-apt` recipe populates the vendor directory from the local Cargo registry cache or by downloading from crates.io:
+
+[source,bash]
+----
+just setup-rust-apt
+----
+
+== Build Requirements
+
+* Rust toolchain (rustc >= 1.85, required for edition 2024)
+* `cargo-deb` (`cargo install cargo-deb`)
+* Development libraries: `libapt-pkg-dev`, `libdbus-1-dev`, `pkg-config`
+* `just` (optional, for recipe shortcuts)
+
+== Building
+
+[source,bash]
+----
+# Check for errors without building
+just check
+
+# Build release binary
+just build
+
+# Build Debian package (sets up vendor/rust-apt automatically)
+just deb
+----
+
+Or with plain Cargo:
+
+[source,bash]
+----
+cargo build --release
+cargo deb
+----
+
+== Testing
+
+[source,bash]
+----
+# Run all tests
+just test
+
+# Run tests with output visible
+just test-verbose
+
+# Run full CI checks (check + clippy + fmt + test)
+just ci
+----
+
+== Testing Manually
+
+Test the APT cache update (requires root):
+
+[source,bash]
+----
+sudo ./target/release/aptupdatechecker update
+----
+
+Test the APT update check (runs as user):
+
+[source,bash]
+----
+./target/release/aptupdatechecker check
+----
+
+Test the firmware check (runs as user):
+
+[source,bash]
+----
+./target/release/aptupdatechecker fwupd
+----
+
+== Debian Packaging
+
+The `debian/` directory contains maintainer scripts used by `cargo-deb`. `cargo-deb` reads unit files from `systemd/system/` and `systemd/user/` as defined in `Cargo.toml` under `[package.metadata.deb]`.
+
+The maintainer scripts enable the system timer (`aptupdatechecker_apt_cache_update.timer`) automatically on package install. Users must enable user units manually — see the README installation instructions.

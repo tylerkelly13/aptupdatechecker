@@ -2,55 +2,50 @@
 
 A system service for checking APT package and firmware updates, with desktop notifications.
 
+== Compatibility
+
+Tested on **Debian testing**. It might not work on Debian stable or Ubuntu.
+
 == Overview
 
-`aptupdatechecker` monitors the system for available updates and sends desktop notifications to alert users. It uses a privilege-separated architecture to ensure security and proper notification delivery.
+`aptupdatechecker` monitors the system for available updates and sends desktop notifications to alert users.
 
 The application checks for:
 
-* APT package updates through apt update and cache inspection
-* Firmware updates through fwupdmgr
+* APT package updates
+* Firmware updates
 
-The application sends notifications using the freedesktop notification system.
+== How It Works
 
-== Architecture
+The service uses a privilege-separated architecture:
 
-The service uses separate processes for different privilege levels:
+* A **system timer** runs `aptupdatechecker update` as root every 3 hours to refresh the APT cache. After updating, it signals each active user session by touching `/run/user/<uid>/apt-updates-available`.
+* A **user path unit** watches for that signal file and runs `aptupdatechecker check` to inspect the cache and send a desktop notification if updates are available.
+* A separate **user timer** runs `aptupdatechecker fwupd` every ~3 hours to check for firmware updates.
 
-* **System services** (run as root): Update the APT package cache
-* **User services** (run as user): Check for updates and send desktop notifications
-
-This separation ensures that notification code runs in the user session (with D-Bus access) while system operations run with appropriate privileges.
+This ensures notification code runs inside the user session (with D-Bus access) while cache updates run with appropriate privileges.
 
 == Installation
 
-Build the Debian package:
+Build and install the Debian package:
 
 [source,bash]
 ----
 cargo deb
+sudo apt install ./target/debian/aptupdatechecker_*.deb
 ----
 
-Install the package:
-
-[source,bash]
-----
-sudo apt install ./target/debian/aptupdatechecker_0.1.0-1_amd64.deb
-----
-
-Enable the user timers for notifications:
+Enable the user units for notifications:
 
 [source,bash]
 ----
-systemctl --user enable --now aptupdatechecker_apt_update_checker.timer
+systemctl --user enable --now aptupdatechecker_apt_update_checker.path
 systemctl --user enable --now aptupdatechecker_firmware_update_checker.timer
 ----
 
-The system timer for APT cache updates enables automatically.
+The system timer for APT cache updates enables automatically on package install.
 
 == Commands
-
-The `aptupdatechecker` binary supports several operation modes:
 
 `aptupdatechecker update`::
 Updates the APT cache (requires root, no notifications). Used by the system service.
@@ -61,37 +56,6 @@ Checks for APT updates and sends notifications (user mode). Does not update the 
 `aptupdatechecker fwupd`::
 Checks for firmware updates and sends notifications (user mode).
 
-`aptupdatechecker apt`::
-Legacy mode: updates cache and checks for APT updates (requires root and D-Bus access).
-
-`aptupdatechecker`::
-Legacy mode: runs both APT and firmware checks.
-
-== Systemd Services
-
-=== System Services
-
-Located in `/lib/systemd/system/`:
-
-`aptupdatechecker_apt_cache_update.service` / `.timer`::
-Updates the APT package cache every 6 hours as root.
-
-`aptupdatechecker_autoclean.service` / `.timer`::
-Runs `apt autoclean` weekly to remove obsolete package files.
-
-`aptupdatechecker_autoremove.service` / `.timer`::
-Runs `apt autoremove` weekly to remove unnecessary packages.
-
-=== User Services
-
-Located in `/usr/lib/systemd/user/`:
-
-`aptupdatechecker_apt_update_checker.service` / `.timer`::
-Checks for APT package updates hourly and sends desktop notifications.
-
-`aptupdatechecker_firmware_update_checker.service` / `.timer`::
-Checks for firmware updates hourly and sends desktop notifications.
-
 == Schedule
 
 [cols="2,1,1,1",options="header"]
@@ -101,17 +65,17 @@ Checks for firmware updates hourly and sends desktop notifications.
 | APT cache update
 | root
 | Every 3 hours
-| 5 minutes after boot
+| 1 minute after boot
 
 | APT update check
 | user
-| Hourly
-| 10 minutes after boot
+| On cache update (path unit)
+| —
 
 | Firmware update check
 | user
-| Hourly
-| 5 minutes after boot
+| Every ~3 hours
+| 10 minutes after boot
 
 | APT autoclean
 | root
@@ -123,60 +87,6 @@ Checks for firmware updates hourly and sends desktop notifications.
 | Weekly
 | 3 hours after boot
 |===
-
-== Development
-
-=== Building
-
-Requirements:
-
-* Rust toolchain (rustc >= 1.70)
-* cargo-deb (`cargo install cargo-deb`)
-* Development libraries: libapt-pkg-dev, libdbus-1-dev, pkg-config
-
-Build the release binary:
-
-[source,bash]
-----
-cargo build --release
-----
-
-Run tests:
-
-[source,bash]
-----
-cargo test
-----
-
-Build the Debian package:
-
-[source,bash]
-----
-cargo deb
-----
-
-=== Testing Manually
-
-Test the APT cache update (requires root):
-
-[source,bash]
-----
-sudo ./target/release/aptupdatechecker update
-----
-
-Test the APT update check (runs as user):
-
-[source,bash]
-----
-./target/release/aptupdatechecker check
-----
-
-Test the firmware check (runs as user):
-
-[source,bash]
-----
-./target/release/aptupdatechecker fwupd
-----
 
 == License
 
