@@ -1,0 +1,20 @@
+name: Checks
+description: Run checks on push and on pull requests to the main and release branches.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    branches:
+      - main
+      - release/*
+    paths-ignore:
+      - '**.md'
+      - '**.adoc'
+      - '**/dependabot.yml'
+
+jobs:
+  Build_and_check:
+    permissions:
+      contents: read
+    uses: tylerkelly13/.github/.github/workflows/rust-run-checks.yml@main

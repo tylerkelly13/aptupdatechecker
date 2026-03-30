@@ -1,0 +1,19 @@
+name: Deploy
+description: Deploy the application when a new version is tagged.
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  Checks:
+    uses: tylerkelly13/.github/.github/workflows/rust-run-checks.yml@main
+
+  Release:
+    needs: [Checks]
+    permissions:
+      contents: write
+    uses: tylerkelly13/.github/.github/workflows/rust-gh-release.yml@main
+    with:
+      artifact-id: ${{ needs.Checks.outputs.artifact-id }}

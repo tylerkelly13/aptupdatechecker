@@ -5,7 +5,9 @@
 
 version: 2
 updates:
-  - package-ecosystem: "rust-toolchain" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "rust-toolchain"
+    commit-message:
+      prefix: "chore(deps): "
+    directory: "/"
     schedule:
       interval: "weekly"
