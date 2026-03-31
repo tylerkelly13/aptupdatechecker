@@ -17,6 +17,7 @@ filetime = "0.2"
 proptest = "1.6"
 tempfile = "3.24"
 cargo-tarpaulin = "0.35.2"
+cargo-deb = "3.6.3"
 
 [package.metadata.deb]
 maintainer = "Tyler Kelly <tyler.kelly@outlook.com>"
