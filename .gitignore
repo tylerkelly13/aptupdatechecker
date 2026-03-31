@@ -15,5 +15,3 @@ debian/files
 # Added by cargo
 
 /target
-/vendor/*
-!/vendor/README.md

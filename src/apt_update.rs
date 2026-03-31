@@ -12,22 +12,12 @@ use rust_apt::progress::AcquireProgress;
 use std::fs;
 use std::time::{Duration, SystemTime};
 
-/// Maximum age (in hours) for the APT cache to be considered fresh.
 const APT_CACHE_MAX_AGE_HOURS: u64 = 8;
-
-/// Path to the APT package cache binary, regenerated on each `apt update`.
 const APT_PKGCACHE_PATH: &str = "/var/cache/apt/pkgcache.bin";
 
-/// Formats an update message based on the number of available updates.
+/// Formats an update message with the count and installation instructions.
 ///
-/// # Arguments
-///
-/// * `count` - The number of available updates
-///
-/// # Returns
-///
-/// A formatted message string describing the updates and how to install them.
-/// Uses singular form for 1 update, plural for multiple updates.
+/// Uses singular form for 1 update, plural otherwise.
 ///
 /// # Examples
 ///
@@ -53,40 +43,22 @@ pub fn format_update_message(count: usize) -> String {
     }
 }
 
-/// Checks for available APT package updates and sends notifications.
+/// Updates the APT cache, then checks for upgradable packages and notifies.
 ///
-/// Performs a two-step process:
-/// 1. Updates the APT package cache to get the latest package information
-/// 2. Counts how many packages can be upgraded
-///
-/// # Notifications
-///
-/// - When updates are available, sends an informational notification with the count
-/// - When errors occur, sends error notifications with details
-/// - When no updates are available, prints to stdout (no notification)
-///
-/// # Errors
-///
-/// Errors during cache initialization or update operations result in error
-/// notifications being sent. The function returns on errors.
+/// Sends error notifications on failure, info notifications when updates
+/// exist, and prints to stdout when none are available.
 pub fn update_and_check() {
-    // Update the APT cache
     if !update_apt_cache(true) {
         return;
     }
 
-    // Check for updates and notify
     check_for_updates();
 }
 
-/// Updates the APT cache only, without checking for updates or sending notifications.
+/// Updates the APT cache without checking for updates or notifying.
 ///
-/// This function is designed to run as root via a system service. It updates
-/// the package lists but does not send any notifications.
-///
-/// # Errors
-///
-/// Errors are printed to stderr. The function does not send notifications.
+/// Intended for the root system service. Prints errors to stderr
+/// rather than sending notifications.
 pub fn update_cache_only() {
     if !update_apt_cache(false) {
         eprintln!("Failed to update APT cache");
@@ -102,11 +74,17 @@ pub fn update_cache_only() {
 /// Touches `/run/user/<uid>/apt-updates-available` for each session directory
 /// found under `/run/user/`. Individual session failures do not abort the rest.
 fn signal_user_sessions() {
-    let run_user = std::path::Path::new("/run/user");
-    let entries = match std::fs::read_dir(run_user) {
+    signal_sessions_in(std::path::Path::new("/run/user"));
+}
+
+/// Creates an `apt-updates-available` signal file in each subdirectory of `base_dir`.
+///
+/// Individual session failures print to stderr but do not abort the rest.
+fn signal_sessions_in(base_dir: &std::path::Path) {
+    let entries = match std::fs::read_dir(base_dir) {
         Ok(e) => e,
         Err(e) => {
-            eprintln!("Failed to read /run/user: {}", e);
+            eprintln!("Failed to read {}: {}", base_dir.display(), e);
             return;
         }
     };
@@ -118,17 +96,10 @@ fn signal_user_sessions() {
     }
 }
 
-/// Checks for available updates and sends notifications without updating the cache.
+/// Checks for upgradable packages and notifies, without updating the cache.
 ///
-/// This function is designed to run as a regular user. It reads the existing
-/// APT cache (which should have been updated by a separate root process) and
-/// sends desktop notifications when updates are available.
-///
-/// # Notifications
-///
-/// - When updates are available, sends an informational notification with the count
-/// - When errors occur, sends error notifications with details
-/// - When no updates are available, prints to stdout (no notification)
+/// Intended for the unprivileged user service. Reads the existing cache
+/// (updated by the root service) and skips the check if the cache is stale.
 pub fn check_only() {
     if !is_apt_cache_fresh() {
         println!("APT cache is stale, skipping update check.");
@@ -142,9 +113,15 @@ pub fn check_only() {
 /// Returns `true` if the cache file at [`APT_PKGCACHE_PATH`] was modified
 /// within the last [`APT_CACHE_MAX_AGE_HOURS`] hours, `false` otherwise.
 fn is_apt_cache_fresh() -> bool {
-    let max_age = Duration::from_secs(APT_CACHE_MAX_AGE_HOURS * 3600);
+    is_cache_fresh(APT_PKGCACHE_PATH, APT_CACHE_MAX_AGE_HOURS)
+}
 
-    let metadata = match fs::metadata(APT_PKGCACHE_PATH) {
+/// Returns `true` if the file at `path` was modified within `max_age_hours`,
+/// `false` if the file is missing, unreadable, or too old.
+fn is_cache_fresh(path: &str, max_age_hours: u64) -> bool {
+    let max_age = Duration::from_secs(max_age_hours * 3600);
+
+    let metadata = match fs::metadata(path) {
         Ok(m) => m,
         Err(_) => return false,
     };
@@ -160,17 +137,8 @@ fn is_apt_cache_fresh() -> bool {
     }
 }
 
-/// Checks for upgradable packages and sends notifications.
-///
-/// Reads the APT cache and counts upgradable packages. Does not update the cache.
-///
-/// # Notifications
-///
-/// - When updates are available, sends an informational notification
-/// - When errors occur, sends error notifications
-/// - When no updates are available, prints to stdout
+/// Counts upgradable packages in the existing APT cache and notifies.
 fn check_for_updates() {
-    // Create a cache for checking upgrades
     let cache = match new_cache!() {
         Ok(cache) => cache,
         Err(e) => {
@@ -183,10 +151,7 @@ fn check_for_updates() {
         }
     };
 
-    // Create a sort that filters only upgradable packages
     let sort = PackageSort::default().upgradable();
-
-    // Count upgradable packages
     let upgrade_count = cache.packages(&sort).count();
 
     if upgrade_count > 0 {
@@ -203,25 +168,13 @@ fn check_for_updates() {
     }
 }
 
-/// Updates the APT package cache (runs `apt update`).
+/// Refreshes APT package lists from all configured repositories.
 ///
-/// Refreshes the package lists from all configured repositories.
+/// - `send_notifications`: When `true`, errors trigger desktop notifications.
+///   When `false`, errors print to stderr.
 ///
-/// # Arguments
-///
-/// * `send_notifications` - Whether to send desktop notifications on errors
-///
-/// # Returns
-///
-/// * `true` - Cache update completed
-/// * `false` - Cache update failed
-///
-/// # Behavior
-///
-/// When `send_notifications` is true, errors trigger desktop notifications.
-/// When false, errors are printed to stderr.
+/// Returns `true` on success, `false` on failure.
 fn update_apt_cache(send_notifications: bool) -> bool {
-    // Create a cache
     let cache = match new_cache!() {
         Ok(cache) => cache,
         Err(e) => {
@@ -238,10 +191,7 @@ fn update_apt_cache(send_notifications: bool) -> bool {
         }
     };
 
-    // Create a progress handler
     let mut progress = AcquireProgress::apt();
-
-    // Update the package lists
     if let Err(e) = cache.update(&mut progress) {
         let error_msgs: Vec<String> = e
             .iter()
@@ -265,6 +215,104 @@ fn update_apt_cache(send_notifications: bool) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::Write;
+    use tempfile::TempDir;
+
+    #[test]
+    fn test_is_cache_fresh_recent_file() {
+        let dir = TempDir::new().unwrap();
+        let path = dir.path().join("cache.bin");
+        std::fs::File::create(&path).unwrap();
+        assert!(is_cache_fresh(path.to_str().unwrap(), 1));
+    }
+
+    #[test]
+    fn test_is_cache_fresh_missing_file() {
+        assert!(!is_cache_fresh("/nonexistent/path/cache.bin", 1));
+    }
+
+    #[test]
+    fn test_is_cache_fresh_old_file() {
+        let dir = TempDir::new().unwrap();
+        let path = dir.path().join("cache.bin");
+        let mut file = std::fs::File::create(&path).unwrap();
+        file.write_all(b"data").unwrap();
+        // Set mtime to 10 hours ago
+        let old_time = filetime::FileTime::from_system_time(
+            SystemTime::now() - Duration::from_secs(10 * 3600),
+        );
+        filetime::set_file_mtime(&path, old_time).unwrap();
+        assert!(!is_cache_fresh(path.to_str().unwrap(), 8));
+    }
+
+    #[test]
+    fn test_is_cache_fresh_zero_max_age() {
+        // A file created "now" should be stale when max_age_hours is 0,
+        // because any non-zero age >= max_age (0 seconds) is false.
+        let dir = TempDir::new().unwrap();
+        let path = dir.path().join("cache.bin");
+        std::fs::File::create(&path).unwrap();
+        // max_age_hours=0 means max_age is 0 seconds, so age < 0s is always false
+        assert!(!is_cache_fresh(path.to_str().unwrap(), 0));
+    }
+
+    #[test]
+    fn test_is_cache_fresh_future_mtime() {
+        // A file with mtime in the future should be treated as fresh
+        let dir = TempDir::new().unwrap();
+        let path = dir.path().join("cache.bin");
+        std::fs::File::create(&path).unwrap();
+        let future_time =
+            filetime::FileTime::from_system_time(SystemTime::now() + Duration::from_secs(3600));
+        filetime::set_file_mtime(&path, future_time).unwrap();
+        assert!(is_cache_fresh(path.to_str().unwrap(), 1));
+    }
+
+    #[test]
+    fn test_signal_sessions_in_creates_files() {
+        let base = TempDir::new().unwrap();
+        let user1 = base.path().join("1000");
+        let user2 = base.path().join("1001");
+        std::fs::create_dir(&user1).unwrap();
+        std::fs::create_dir(&user2).unwrap();
+
+        signal_sessions_in(base.path());
+
+        assert!(user1.join("apt-updates-available").exists());
+        assert!(user2.join("apt-updates-available").exists());
+    }
+
+    #[test]
+    fn test_signal_sessions_in_missing_dir() {
+        // Should not panic on missing directory
+        signal_sessions_in(std::path::Path::new("/nonexistent/path"));
+    }
+
+    #[test]
+    fn test_signal_sessions_in_unwritable_subdir() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let base = TempDir::new().unwrap();
+        let readonly_dir = base.path().join("1000");
+        std::fs::create_dir(&readonly_dir).unwrap();
+        // Remove write permission so File::create inside fails
+        std::fs::set_permissions(&readonly_dir, std::fs::Permissions::from_mode(0o555)).unwrap();
+
+        // Should not panic — the error is logged to stderr and skipped
+        signal_sessions_in(base.path());
+
+        assert!(!readonly_dir.join("apt-updates-available").exists());
+
+        // Restore permissions so TempDir cleanup succeeds
+        std::fs::set_permissions(&readonly_dir, std::fs::Permissions::from_mode(0o755)).unwrap();
+    }
+
+    #[test]
+    fn test_signal_sessions_in_empty_dir() {
+        let base = TempDir::new().unwrap();
+        signal_sessions_in(base.path());
+        // No panic, no files created
+    }
 
     #[test]
     fn test_format_update_message_singular() {
