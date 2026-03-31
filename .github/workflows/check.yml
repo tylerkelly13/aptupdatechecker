@@ -18,3 +18,5 @@ jobs:
     permissions:
       contents: read
     uses: tylerkelly13/.github/.github/workflows/rust-run-checks.yml@main
+    with:
+      coverage: true
