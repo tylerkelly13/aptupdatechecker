@@ -8,25 +8,13 @@ use crate::common::{App, NotificationType, notify, notify_error};
 use regex::Regex;
 use std::process::Command;
 
-/// Returns the regex pattern for matching firmware update device IDs.
-///
-/// # Returns
-///
-/// A compiled regex pattern that matches "Device ID: <identifier>" lines
-/// in fwupdmgr output.
+/// Matches `'Device ID: <id>'` lines in fwupdmgr output, which indicate
+/// devices with available updates.
 fn get_device_id_pattern() -> Regex {
     Regex::new(r"'Device ID:\s+\w+'").unwrap()
 }
 
-/// Counts the number of available firmware updates from fwupdmgr output.
-///
-/// # Arguments
-///
-/// * `output` - The stdout from `fwupdmgr get-updates`
-///
-/// # Returns
-///
-/// The number of devices with available firmware updates.
+/// Counts devices with available firmware updates in fwupdmgr output.
 ///
 /// # Examples
 ///
@@ -40,15 +28,7 @@ pub fn count_firmware_updates(output: &str) -> usize {
     pattern.find_iter(output).count()
 }
 
-/// Formats a firmware update notification message.
-///
-/// # Arguments
-///
-/// * `count` - The number of available firmware updates
-///
-/// # Returns
-///
-/// A formatted message string describing the updates and how to install them.
+/// Formats a firmware update message with the count and installation instructions.
 ///
 /// # Examples
 ///
@@ -68,19 +48,6 @@ pub fn format_firmware_message(count: usize) -> String {
 
 /// Refreshes firmware metadata and checks for available updates.
 ///
-/// Main entry point for firmware update checking. Performs
-/// a two-step process:
-/// 1. Refreshes the firmware metadata cache (through `fwupdmgr refresh --force`)
-/// 2. Queries for available firmware updates (through `fwupdmgr get-updates`)
-///
-/// # Notifications
-///
-/// - When updates are available, sends an informational notification with the count
-/// - When errors occur, sends error notifications with details
-/// - When no updates are available, prints to stdout (no notification)
-///
-/// # Dependencies
-///
 /// Requires `fwupdmgr` to be installed and accessible in the system PATH.
 pub fn update_and_check() {
     if update_fw_update_cache() {
@@ -88,21 +55,13 @@ pub fn update_and_check() {
     }
 }
 
-/// Refreshes the firmware update metadata cache.
+/// Refreshes the firmware update metadata cache via `fwupdmgr refresh --force`.
 ///
-/// Executes `fwupdmgr refresh --force` to download the latest firmware
-/// metadata from configured remotes. The `--force` flag ensures the cache
-/// refreshes regardless of last update time.
-///
-/// # Returns
-///
-/// * `true` - Cache refresh completed successfully
-/// * `false` - Cache refresh failed (error notification sent)
+/// The `--force` flag ensures the cache refreshes regardless of last update time.
 ///
 /// # Panics
 ///
-/// Panics when executing the `fwupdmgr` command fails (for example, not installed
-/// or not in PATH).
+/// Panics if `fwupdmgr` is not installed or not in PATH.
 fn update_fw_update_cache() -> bool {
     let output = Command::new("fwupdmgr")
         .arg("refresh")
@@ -123,27 +82,14 @@ fn update_fw_update_cache() -> bool {
     }
 }
 
-/// Checks for available firmware updates and sends notifications.
+/// Queries `fwupdmgr get-updates` and notifies when updates exist.
 ///
-/// Executes `fwupdmgr get-updates` to query for available firmware updates.
-/// Parses the output using a regex pattern to count how many devices have
-/// updates available.
-///
-/// # Notification Behavior
-///
-/// - Sends an info notification when one or more firmware updates are available
-/// - Sends an error notification when the check fails
-/// - Prints to stdout when no updates are available (no notification)
-///
-/// # Implementation Details
-///
-/// Uses a regex pattern to match "Device ID:" lines in the output, which
-/// correspond to devices with available updates.
-/// `fwupdmgr` does not provide machine-readable output.
+/// Parses "Device ID:" lines via regex because `fwupdmgr` does not
+/// provide machine-readable output.
 ///
 /// # Panics
 ///
-/// Panics when the `fwupdmgr` command fails.
+/// Panics if `fwupdmgr` is not installed or not in PATH.
 fn check_for_fw_updates() {
     let output = Command::new("fwupdmgr")
         .arg("get-updates")
@@ -221,6 +167,25 @@ mod tests {
             Random content
         "#;
         assert_eq!(count_firmware_updates(output), 2);
+    }
+
+    #[test]
+    fn test_count_firmware_updates_malformed_device_id() {
+        // Missing closing quote
+        assert_eq!(count_firmware_updates("'Device ID: abc123"), 0);
+        // No ID after colon
+        assert_eq!(count_firmware_updates("'Device ID:  '"), 0);
+        // Missing opening quote
+        assert_eq!(count_firmware_updates("Device ID: abc123'"), 0);
+        // Extra text inside quotes
+        assert_eq!(count_firmware_updates("'Device ID: abc 123'"), 0);
+    }
+
+    #[test]
+    fn test_count_firmware_updates_partial_matches() {
+        // One valid, one malformed — should count only the valid one
+        let output = "'Device ID: valid1'\n'Device ID: '\nDevice ID: noquotes";
+        assert_eq!(count_firmware_updates(output), 1);
     }
 
     #[test]

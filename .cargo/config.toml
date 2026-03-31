@@ -1,2 +1,0 @@
-[env]
-CXXFLAGS = "-std=c++17"
