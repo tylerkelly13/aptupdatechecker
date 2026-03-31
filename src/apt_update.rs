@@ -246,6 +246,29 @@ mod tests {
     }
 
     #[test]
+    fn test_is_cache_fresh_zero_max_age() {
+        // A file created "now" should be stale when max_age_hours is 0,
+        // because any non-zero age >= max_age (0 seconds) is false.
+        let dir = TempDir::new().unwrap();
+        let path = dir.path().join("cache.bin");
+        std::fs::File::create(&path).unwrap();
+        // max_age_hours=0 means max_age is 0 seconds, so age < 0s is always false
+        assert!(!is_cache_fresh(path.to_str().unwrap(), 0));
+    }
+
+    #[test]
+    fn test_is_cache_fresh_future_mtime() {
+        // A file with mtime in the future should be treated as fresh
+        let dir = TempDir::new().unwrap();
+        let path = dir.path().join("cache.bin");
+        std::fs::File::create(&path).unwrap();
+        let future_time =
+            filetime::FileTime::from_system_time(SystemTime::now() + Duration::from_secs(3600));
+        filetime::set_file_mtime(&path, future_time).unwrap();
+        assert!(is_cache_fresh(path.to_str().unwrap(), 1));
+    }
+
+    #[test]
     fn test_signal_sessions_in_creates_files() {
         let base = TempDir::new().unwrap();
         let user1 = base.path().join("1000");
@@ -263,6 +286,25 @@ mod tests {
     fn test_signal_sessions_in_missing_dir() {
         // Should not panic on missing directory
         signal_sessions_in(std::path::Path::new("/nonexistent/path"));
+    }
+
+    #[test]
+    fn test_signal_sessions_in_unwritable_subdir() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let base = TempDir::new().unwrap();
+        let readonly_dir = base.path().join("1000");
+        std::fs::create_dir(&readonly_dir).unwrap();
+        // Remove write permission so File::create inside fails
+        std::fs::set_permissions(&readonly_dir, std::fs::Permissions::from_mode(0o555)).unwrap();
+
+        // Should not panic — the error is logged to stderr and skipped
+        signal_sessions_in(base.path());
+
+        assert!(!readonly_dir.join("apt-updates-available").exists());
+
+        // Restore permissions so TempDir cleanup succeeds
+        std::fs::set_permissions(&readonly_dir, std::fs::Permissions::from_mode(0o755)).unwrap();
     }
 
     #[test]

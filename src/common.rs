@@ -194,12 +194,7 @@ mod tests {
 
     #[test]
     fn test_build_notification_info() {
-        let n = build_notification(
-            NotificationType::Info,
-            App::Apt,
-            "Test Title",
-            "Test Body",
-        );
+        let n = build_notification(NotificationType::Info, App::Apt, "Test Title", "Test Body");
         assert_eq!(n.summary, "Test Title");
         assert_eq!(n.body, "Test Body");
         assert_eq!(n.appname, "Apt Update Checker");

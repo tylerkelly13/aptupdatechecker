@@ -170,6 +170,25 @@ mod tests {
     }
 
     #[test]
+    fn test_count_firmware_updates_malformed_device_id() {
+        // Missing closing quote
+        assert_eq!(count_firmware_updates("'Device ID: abc123"), 0);
+        // No ID after colon
+        assert_eq!(count_firmware_updates("'Device ID:  '"), 0);
+        // Missing opening quote
+        assert_eq!(count_firmware_updates("Device ID: abc123'"), 0);
+        // Extra text inside quotes
+        assert_eq!(count_firmware_updates("'Device ID: abc 123'"), 0);
+    }
+
+    #[test]
+    fn test_count_firmware_updates_partial_matches() {
+        // One valid, one malformed — should count only the valid one
+        let output = "'Device ID: valid1'\n'Device ID: '\nDevice ID: noquotes";
+        assert_eq!(count_firmware_updates(output), 1);
+    }
+
+    #[test]
     fn test_format_firmware_message_single() {
         let msg = format_firmware_message(1);
         assert_eq!(
