@@ -10,13 +10,12 @@ repository = "https://github.com/tyler/aptupdatechecker"
 [dependencies]
 notify-rust = "4.11.7"
 regex = "1.12.2"
-rust-apt = "0.8.0"
+rust-apt = "0.9.0"
 
 [dev-dependencies]
+filetime = "0.2"
 proptest = "1.6"
-
-[patch.crates-io]
-rust-apt = { path = "vendor/rust-apt" }
+tempfile = "3.24"
 
 [package.metadata.deb]
 maintainer = "Tyler Kelly <tyler.kelly@outlook.com>"
