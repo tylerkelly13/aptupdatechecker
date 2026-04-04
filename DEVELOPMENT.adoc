@@ -37,18 +37,6 @@ src/                    Application source
 systemd/system/         System-level unit files (source)
 systemd/user/           User-level unit files (source)
 debian/                 Maintainer scripts for dpkg
-vendor/rust-apt/        Vendored rust-apt crate (see below)
-----
-
-== Vendored Dependency
-
-The project vendors `rust-apt` 0.8.0 under `vendor/rust-apt/` with a local patch (`rust-apt-libapt3.patch`) applied. The patch replaces `APT::StringView` with `std::string_view` in `apt-pkg-c/cache.h` to support `libapt-pkg7.0` (libapt-pkg 3.x) shipped by Debian testing. The upstream `rust-apt` crate targets the older version.
-
-The `setup-rust-apt` recipe populates the vendor directory from the local Cargo registry cache or by downloading from crates.io:
-
-[source,bash]
-----
-just setup-rust-apt
 ----
 
 == Build Requirements
@@ -68,7 +56,7 @@ just check
 # Build release binary
 just build
 
-# Build Debian package (sets up vendor/rust-apt automatically)
+# Build Debian package
 just deb
 ----
 
@@ -116,6 +104,85 @@ Test the firmware check (runs as user):
 ----
 ./target/release/aptupdatechecker fwupd
 ----
+
+== CI Container Image
+
+The CI workflows run inside a Docker container (`tylerkelly13/rust-aptupdatechecker-ci:latest`) that includes all build dependencies pre-installed. The Dockerfile lives at `.github/workflows/Dockerfile` and is automatically built and pushed to Docker Hub when changed on `main`.
+
+=== Required Repository Secrets
+
+[cols="1,2",options="header"]
+|===
+| Secret | Description
+
+| `DOCKERHUB_USERNAME`
+| Docker Hub username for pushing the CI image
+
+| `DOCKERHUB_TOKEN`
+| Docker Hub access token (not your password — generate one at https://hub.docker.com/settings/security)
+|===
+
+== CI/CD Pipeline
+
+The project uses reusable GitHub Actions workflows from `tylerkelly13/.github`.
+
+image::.github/workflows/ci-cd-pipeline.svg[CI/CD Pipeline]
+
+[%collapsible]
+.Raw Mermaid diagram source
+====
+[source,mermaid]
+----
+flowchart TD
+    subgraph checks["check.yml — PR Checks"]
+        A1["Triggers:\nworkflow_dispatch\npull_request (main, release/*)"]
+        A1 --> A2["Job: Build_and_check\n(contents: read)"]
+        A2 --> RC["rust-run-checks.yml\n(coverage: true)"]
+    end
+
+    subgraph deploy["deploy.yml — Deploy"]
+        B1["Trigger:\npush tag v*"]
+        B1 --> B2["Job: Checks"]
+        B2 --> RC2["rust-run-checks.yml\n(coverage: false)"]
+        RC2 --> B3["Job: Release\n(needs: Checks)"]
+        B3 --> GHR["rust-gh-release.yml\n(artifact-id from Checks)"]
+    end
+
+    subgraph run_checks["rust-run-checks.yml (reusable)\nconcurrency: deploy, cancel-in-progress"]
+        direction TB
+        RCB["Build\n(rust-build.yml)"]
+        RCL["Linting\n(rust-lint.yml)"]
+        RCF["Formatting\n(rust-formatting.yml)"]
+        RCT["Tests\n(rust-test.yml)"]
+        RCC["Coverage\n(rust-coverage.yml)\nif: enabled"]
+    end
+
+    subgraph rust_build["rust-build.yml steps"]
+        S1["cargo-setup:\ncheckout + cache Cargo deps"]
+        S2["just build"]
+        S3["just deb"]
+        S4["sha256sum → checksums"]
+        S5["Upload artifacts\n→ artifact-id"]
+        S1 --> S2 --> S3 --> S4 --> S5
+    end
+
+    subgraph gh_release["rust-gh-release.yml steps"]
+        R1["Download artifact\n(actions/download-artifact)"]
+        R2["GitHub Release (draft)\n*.deb + checksums\n(softprops/action-gh-release)"]
+        R1 --> R2
+    end
+
+    RC --> run_checks
+    RC2 --> run_checks
+    RCB --> rust_build
+    GHR --> gh_release
+----
+====
+
+=== Workflow summary
+
+* **check.yml** — runs on PRs to `main`/`release/*` and manual dispatch. Calls `rust-run-checks.yml` with coverage enabled. Five parallel jobs: Build, Linting, Formatting, Tests, Coverage.
+* **deploy.yml** — runs on `v*` tag push. Runs the same checks (without coverage), then creates a draft GitHub Release with `.deb` packages and checksums.
 
 == Debian Packaging
 
