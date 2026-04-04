@@ -30,12 +30,17 @@ jobs:
           cache-image: true
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+      - name: Extract version from Cargo.toml
+        id: version
+        run: echo "version=$(grep '^version' Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')" >> "$GITHUB_OUTPUT"
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
           context: .
           file: .github/workflows/Dockerfile
           push: true
-          tags: tylerkelly/rust-aptupdatechecker-ci:latest
+          tags: |
+            tylerkelly/rust-aptupdatechecker-ci:latest
+            tylerkelly/rust-aptupdatechecker-ci:aptupdatechecker-v${{ steps.version.outputs.version }}
           cache-from: type=registry,ref=tylerkelly/rust-aptupdatechecker-ci:latest
           cache-to: type=inline
