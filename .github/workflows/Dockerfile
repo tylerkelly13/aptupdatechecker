@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     curl \
     libssl-dev \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN cargo install cargo-deb cargo-tarpaulin \
