@@ -292,6 +292,12 @@ mod tests {
     fn test_signal_sessions_in_unwritable_subdir() {
         use std::os::unix::fs::PermissionsExt;
 
+        // Running as root bypasses POSIX permission checks, so we skip
+        // this test unless run as an unprivileged user.
+        if unsafe { libc::geteuid() } == 0 {
+            return;
+        }
+
         let base = TempDir::new().unwrap();
         let readonly_dir = base.path().join("1000");
         std::fs::create_dir(&readonly_dir).unwrap();
