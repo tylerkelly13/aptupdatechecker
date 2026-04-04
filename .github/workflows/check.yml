@@ -9,14 +9,19 @@ on:
       - main
       - release/*
     paths-ignore:
+      - '**.dockerfile'
       - '**.md'
       - '**.adoc'
       - '**/dependabot.yml'
+
+# drop all default permissions; grant least privilege per job
+permissions: {}
 
 jobs:
   Build_and_check:
     permissions:
       contents: read
+      actions: write  # required by rust-build.yml for artifact upload
     uses: tylerkelly13/.github/.github/workflows/rust-run-checks.yml@main
     with:
       coverage: true
