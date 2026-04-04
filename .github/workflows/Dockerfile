@@ -7,10 +7,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libssl-dev \
     zlib1g-dev \
-    libc++1 \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
-RUN cargo install cargo-deb cargo-tarpaulin \
+RUN cargo install cargo-deb cargo-tarpaulin cargo-fmt cargo-clippy \
     && rm -rf /usr/local/cargo/registry
 
 COPY --from=ghcr.io/casey/just:latest /just /usr/local/bin/
