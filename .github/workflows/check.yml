@@ -25,3 +25,4 @@ jobs:
     uses: tylerkelly13/.github/.github/workflows/rust-run-checks.yml@main
     with:
       coverage: true
+      container-image: tylerkelly/rust-aptupdatechecker-ci:latest

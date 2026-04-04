@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN cargo install cargo-deb cargo-tarpaulin just \
+RUN cargo install cargo-deb cargo-tarpaulin \
     && rm -rf /usr/local/cargo/registry
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+COPY --from=ghcr.io/casey/just:latest /just /usr/local/bin/
