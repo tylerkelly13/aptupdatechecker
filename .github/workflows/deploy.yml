@@ -6,14 +6,20 @@ on:
     tags:
       - v*
 
+# drop all default permissions; grant least privilege per job
+permissions: {}
+
 jobs:
   Checks:
+    permissions:
+      contents: read
+      actions: write  # required by rust-build.yml for artifact upload
     uses: tylerkelly13/.github/.github/workflows/rust-run-checks.yml@main
 
   Release:
     needs: [Checks]
     permissions:
-      contents: write
+      contents: write  # required to create GitHub releases
     uses: tylerkelly13/.github/.github/workflows/rust-gh-release.yml@main
     with:
       artifact-id: ${{ needs.Checks.outputs.artifact-id }}
