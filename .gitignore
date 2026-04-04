@@ -16,3 +16,4 @@ debian/files
 
 /target
 /build
+build_rs_cov.profraw

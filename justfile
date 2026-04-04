@@ -35,7 +35,7 @@ test-verbose:
 
 # Run tests with code coverage
 coverage:
-    cargo tarpaulin --out html --output-dir target/tarpaulin
+    cargo tarpaulin --engine llvm --out html --output-dir target/tarpaulin
 
 # Build release binary
 build:
