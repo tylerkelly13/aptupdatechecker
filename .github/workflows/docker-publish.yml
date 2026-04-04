@@ -36,6 +36,6 @@ jobs:
           context: .
           file: .github/workflows/Dockerfile
           push: true
-          tags: tylerkelly13/rust-aptupdatechecker-ci:latest
-          cache-from: type=registry,ref=tylerkelly13/rust-aptupdatechecker-ci:latest
+          tags: tylerkelly/rust-aptupdatechecker-ci:latest
+          cache-from: type=registry,ref=tylerkelly/rust-aptupdatechecker-ci:latest
           cache-to: type=inline
