@@ -3,6 +3,16 @@ graph LR
         A1["pull_request / workflow_dispatch"] --> A2["rust-run-checks.yml\n(coverage: true, container-image)"]
     end
 
+    subgraph bump["bump.yml — workflow_dispatch"]
+        C1["workflow_dispatch\n(bump: major|minor|patch)"] --> C2["rust-bump-version.yml\n(bump, container-image)"]
+        C2 --> C3["Checks → Bump → PR"]
+    end
+
+    subgraph tag["tag.yml — pull_request closed"]
+        D1["pull_request closed\n(merged && head bump-v*)"] --> D2["rust-tag-on-merge.yml"]
+        D2 -->|"push tag"| B1
+    end
+
     subgraph deploy["deploy.yml — tag push"]
         B1["push tag v*"] --> B2["rust-run-checks.yml\n(container-image)"]
         B2 -->|"artifact-id"| B3["rust-gh-release.yml"]

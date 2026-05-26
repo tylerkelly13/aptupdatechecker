@@ -1,0 +1,18 @@
+name: Tag on bump merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  Tag:
+    # Only run when a bump-v* PR was actually merged (not just closed).
+    if: >
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'bump-v')
+    permissions:
+      contents: write
+    uses: tylerkelly13/.github/.github/workflows/rust-tag-on-merge.yml@main

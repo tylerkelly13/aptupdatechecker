@@ -138,6 +138,16 @@ graph LR
         A1["pull_request / workflow_dispatch"] --> A2["rust-run-checks.yml\n(coverage: true, container-image)"]
     end
 
+    subgraph bump["bump.yml — workflow_dispatch"]
+        C1["workflow_dispatch\n(bump: major|minor|patch)"] --> C2["rust-bump-version.yml\n(bump, container-image)"]
+        C2 --> C3["Checks → Bump → PR"]
+    end
+
+    subgraph tag["tag.yml — pull_request closed"]
+        D1["pull_request closed\n(merged && head bump-v*)"] --> D2["rust-tag-on-merge.yml"]
+        D2 -->|"push tag"| B1
+    end
+
     subgraph deploy["deploy.yml — tag push"]
         B1["push tag v*"] --> B2["rust-run-checks.yml\n(container-image)"]
         B2 -->|"artifact-id"| B3["rust-gh-release.yml"]
@@ -148,6 +158,8 @@ graph LR
 === Workflow summary
 
 * **check.yml** — Runs on pull requests to `main` and `release/*` branches, and on manual dispatch. Calls `rust-run-checks` with coverage enabled, using the `tylerkelly/rust-aptupdatechecker-ci` container image. Ignores documentation and Dockerfile changes.
+* **bump.yml** — Triggered manually from the Actions tab. Calls `rust-bump-version` to run CI, bump the version, and open a pull request.
+* **tag.yml** — Fires when GitHub merges a pull request whose head branch starts with `bump-v`. Calls `rust-tag-on-merge` to create and push the annotated tag, which then triggers `deploy.yml`.
 * **deploy.yml** — Triggers on `v*` tag pushes. Calls `rust-run-checks` first (using the same container image), then passes the build artifact to `rust-gh-release` to create a draft GitHub release.
 
 == Debian Packaging
@@ -155,3 +167,10 @@ graph LR
 The `debian/` directory contains maintainer scripts used by `cargo-deb`. `cargo-deb` reads unit files from `systemd/system/` and `systemd/user/` as defined in `Cargo.toml` under `[package.metadata.deb]`.
 
 The maintainer scripts enable the system timer (`aptupdatechecker_apt_cache_update.timer`) automatically on package install. Users must enable user units manually — see the README installation instructions.
+
+== Releasing a new version
+
+You can release a new version either:
+
+* In GitHub Actions (the *Bump version* workflow)
+* Locally with the `just bump` script and a PR

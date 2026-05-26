@@ -1,0 +1,32 @@
+name: Bump version
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Which version part to bump
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+permissions: {}
+
+# Don't cancel in-flight bumps; cancelling between commit and PR creation
+# would leave a dangling branch.
+concurrency:
+  group: bump-version
+  cancel-in-progress: false
+
+jobs:
+  Bump:
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write  # required by rust-build.yml for artifact upload
+    uses: tylerkelly13/.github/.github/workflows/rust-bump-version.yml@main
+    with:
+      bump: ${{ inputs.bump }}
+      container-image: tylerkelly/rust-aptupdatechecker-ci:latest
