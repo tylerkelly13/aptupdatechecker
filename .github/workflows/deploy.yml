@@ -14,7 +14,7 @@ jobs:
     permissions:
       contents: read
       actions: write  # required by rust-build.yml for artifact upload
-    uses: tylerkelly13/.github/.github/workflows/rust-run-checks.yml@main
+    uses: tylerkelly13/.github/.github/workflows/rust-run-checks.yml@57b7fbaf07c295fe93485f75bcf65449b070794b  # rust-run-checks-civ2
     with:
       container-image: tylerkelly/rust-aptupdatechecker-ci:latest
 
@@ -22,6 +22,6 @@ jobs:
     needs: [Checks]
     permissions:
       contents: write  # required to create GitHub releases
-    uses: tylerkelly13/.github/.github/workflows/rust-gh-release.yml@main
+    uses: tylerkelly13/.github/.github/workflows/rust-gh-release.yml@8d7d2e6616254a836736b88f3eb078caf96716db  # rust-gh-release-civ1
     with:
       artifact-id: ${{ needs.Checks.outputs.artifact-id }}
