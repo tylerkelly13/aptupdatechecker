@@ -57,3 +57,7 @@ vendor-deps:
 deb:
     cargo deb
 
+# Bump version (major, minor, or patch) and push branch for PR
+bump TYPE:
+    ./scripts/bump-version.sh {{TYPE}}
+
