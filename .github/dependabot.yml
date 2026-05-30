@@ -19,3 +19,12 @@ updates:
         dependency-type: "production"
       development-dependencies:
         dependency-type: "development"
+  - package-ecosystem: "github-actions"
+    commit-message:
+      prefix: "chore(deps)"
+    directory: "/"
+    cooldown:
+      default-days: 2
+    schedule:
+      interval: "cron"
+      cronjob: "0 17 * * 0"

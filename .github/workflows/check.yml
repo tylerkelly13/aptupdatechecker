@@ -22,7 +22,7 @@ jobs:
     permissions:
       contents: read
       actions: write  # required by rust-build.yml for artifact upload
-    uses: tylerkelly13/.github/.github/workflows/rust-run-checks.yml@main
+    uses: tylerkelly13/.github/.github/workflows/rust-run-checks.yml@57b7fbaf07c295fe93485f75bcf65449b070794b  # rust-run-checks-civ2
     with:
       coverage: true
       container-image: tylerkelly/rust-aptupdatechecker-ci:latest

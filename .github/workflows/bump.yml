@@ -26,7 +26,7 @@ jobs:
       contents: write
       pull-requests: write
       actions: write  # required by rust-build.yml for artifact upload
-    uses: tylerkelly13/.github/.github/workflows/rust-bump-version.yml@main
+    uses: tylerkelly13/.github/.github/workflows/rust-bump-version.yml@57b7fbaf07c295fe93485f75bcf65449b070794b  # rust-bump-version-civ2
     with:
       bump: ${{ inputs.bump }}
       container-image: tylerkelly/rust-aptupdatechecker-ci:latest

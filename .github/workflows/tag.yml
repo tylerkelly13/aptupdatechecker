@@ -15,4 +15,4 @@ jobs:
       startsWith(github.event.pull_request.head.ref, 'bump-v')
     permissions:
       contents: write
-    uses: tylerkelly13/.github/.github/workflows/rust-tag-on-merge.yml@main
+    uses: tylerkelly13/.github/.github/workflows/rust-tag-on-merge.yml@8d7d2e6616254a836736b88f3eb078caf96716db  # rust-tag-on-merge-civ1
