@@ -396,9 +396,9 @@ dependencies = [
 
 [[package]]
 name = "cargo-tarpaulin"
-version = "0.37.2"
+version = "0.37.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e49d598c055e5b87916a343aead1770551ebf8844658a8162b615b267d231b1c"
+checksum = "2046ed25b78d4f111099c2a185261046c524c7185d6b167afc5660eba8def8b3"
 dependencies = [
  "cargo-config2",
  "cargo_metadata",
@@ -418,7 +418,7 @@ dependencies = [
  "object 0.40.0",
  "proc-macro2",
  "procfs",
- "quick-xml 0.41.0",
+ "quick-xml 0.42.0",
  "quote",
  "regex",
  "rustc-demangle",
@@ -1978,9 +1978,9 @@ dependencies = [
 
 [[package]]
 name = "quick-xml"
-version = "0.41.0"
+version = "0.42.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e660451e55124f798a69a5af3f49ccfbefbd41910eefd25caf2393e1f3473ec1"
+checksum = "41b1177fdf999d2321d3fb46ff47159d9c1fb9ad66a4879f8c50a0b504615e9b"
 dependencies = [
  "memchr",
 ]
@@ -2134,9 +2134,9 @@ dependencies = [
 
 [[package]]
 name = "rust-apt"
-version = "0.11.2"
+version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af431210fe16248c18124b83da8dcb809f55625eb847b899dfe2ef7060ca04bf"
+checksum = "6f3baa272fd784ce1a791ea2ef2f599fca23fbbbced7782a05c6f5007431ec79"
 dependencies = [
  "cxx",
  "cxx-build",
